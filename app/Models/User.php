@@ -23,10 +23,10 @@ class User extends Authenticatable
     /**
      * Kolom untuk autentikasi (override default 'email')
      */
-    public function getAuthIdentifierName()
-    {
-        return 'username';
-    }
+    // public function getAuthIdentifierName()
+    // {
+    //     return 'username';
+    // }
 
     /**
      * The attributes that should be hidden for serialization.
