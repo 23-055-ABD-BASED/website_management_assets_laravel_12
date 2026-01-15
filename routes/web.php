@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PegawaiController;
+use App\Http\Controllers\Admin\AsetController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,6 +44,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/dashboard', function () {
             return view('admin.dashboard');
         })->name('admin.dashboard');
+        
+        // CRUD ASET (ADMIN)
+        Route::prefix('admin')->name('admin.')->group(function () {
+            Route::resource('aset', AsetController::class);
+        });
+
     });
 
     // PEGAWAI (WAJIB DIISI DULU)
