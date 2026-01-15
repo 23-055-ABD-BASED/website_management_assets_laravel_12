@@ -223,12 +223,12 @@
                                 </div>
                                 <div class="flex justify-between items-center pb-2 border-b border-white/10">
                                     <span class="text-slate-400">Latency</span>
-                                    <span class="text-white">24ms</span>
+                                    <span class="text-white">999ms</span>
                                 </div>
                                 <div>
                                     <span class="text-slate-400 block mb-1">Load</span>
                                     <div class="w-full bg-white/10 rounded-full h-1.5">
-                                        <div class="bg-[#fd2800] h-1.5 rounded-full" style="width: 35%"></div>
+                                        <div class="bg-[#fd2800] h-1.5 rounded-full" style="width: 100%"></div>
                                     </div>
                                 </div>
                             </div>

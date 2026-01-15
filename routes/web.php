@@ -6,8 +6,11 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PegawaiController;
-use App\Models\User; 
 use App\Http\Controllers\Admin\AsetController;
+use App\Models\User;
+use App\Models\Pegawai;
+use App\Models\Aset;
+use Carbon\Carbon;
 
 /*
 |--------------------------------------------------------------------------
@@ -45,34 +48,12 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 Route::middleware('auth')->group(function () {
 
     // --- 1. DASHBOARD USER BIASA ---
-    // ADMIN
-    Route::middleware('admin')->group(function () {
-        Route::get('/admin/dashboard', function () {
-            return view('admin.dashboard');
-        })->name('admin.dashboard');
-        
-        // CRUD ASET (ADMIN)
-        Route::prefix('admin')->name('admin.')->group(function () {
-            Route::resource('aset', AsetController::class);
-        });
-
-    });
-
-    // PEGAWAI (WAJIB DIISI DULU)
-    Route::get('/pegawai/create', [PegawaiController::class, 'create'])
-        ->name('pegawai.create');
-
-    Route::post('/pegawai', [PegawaiController::class, 'store'])
-        ->name('pegawai.store');
-
-    // DASHBOARD
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
 
     // --- 2. PEGAWAI SELF-SERVICE (User Mendaftarkan Diri) ---
-    // Route ini ditaruh DI LUAR middleware 'admin' agar user biasa bisa akses.
-    // URL kita buat beda sedikit agar rapi (/pegawai/daftar).
+    // URL dibuat '/pegawai/daftar' agar user biasa bisa akses form create
     Route::get('/pegawai/daftar', [PegawaiController::class, 'create'])->name('pegawai.create');
     Route::post('/pegawai', [PegawaiController::class, 'store'])->name('pegawai.store');
 
@@ -83,29 +64,67 @@ Route::middleware('auth')->group(function () {
 
     // --- 4. GROUP KHUSUS ADMIN ---
     Route::middleware('admin')->group(function () {
-        
-        // ADMIN DASHBOARD
+
+        // ==========================================
+        // ADMIN DASHBOARD (Logika Statistik Realtime)
+        // ==========================================
         Route::get('/admin/dashboard', function () {
-            // Data untuk modal popup (jika masih digunakan admin)
+            // 1. Helper function hitung pertumbuhan bulan ini vs bulan lalu
+            $getGrowth = function ($model) {
+                $now = Carbon::now();
+                $currentMonth = $model::whereMonth('created_at', $now->month)->whereYear('created_at', $now->year)->count();
+                $lastMonth = $model::whereMonth('created_at', $now->subMonth()->month)->whereYear('created_at', $now->subMonth()->year)->count();
+                
+                $diff = $currentMonth - $lastMonth;
+                // Hindari division by zero
+                $percentage = $lastMonth > 0 ? round(($diff / $lastMonth) * 100, 1) : ($currentMonth > 0 ? 100 : 0);
+                
+                return [
+                    'total' => $model::count(),
+                    'diff' => $diff,
+                    'percentage' => $percentage,
+                    'is_positive' => $diff >= 0
+                ];
+            };
+
+            // 2. Hitung Statistik
+            $stats = [
+                'pegawai' => $getGrowth(Pegawai::class),
+                'user'    => $getGrowth(User::class),
+                'aset'    => $getGrowth(Aset::class),
+            ];
+
+            // 3. Data Preview Tabel (5 Terakhir)
+            $latestPegawai = Pegawai::latest()->take(5)->get();
+            $latestAset    = Aset::latest()->take(5)->get();
+
+            // 4. Data User untuk Modal "Tambah Pegawai"
             $users = User::where('role', '!=', 'admin')
                         ->doesntHave('pegawai')
                         ->get();
 
-            return view('admin.dashboard', compact('users'));
+            return view('admin.dashboard', compact('stats', 'latestPegawai', 'latestAset', 'users'));
         })->name('admin.dashboard');
 
-        // MANAJEMEN PEGAWAI (Admin Only)
-        // Kita definisikan manual sisa route resource agar tidak bentrok dengan create/store di atas.
-        
-        // Melihat Daftar Pegawai
+        // ==========================================
+        // MANAJEMEN ASET (Resource)
+        // ==========================================
+        Route::prefix('admin')->name('admin.')->group(function () {
+            Route::resource('aset', AsetController::class);
+        });
+
+        // ==========================================
+        // MANAJEMEN PEGAWAI (Admin Actions)
+        // ==========================================
+        // Index Pegawai
         Route::get('/pegawai', [PegawaiController::class, 'index'])->name('pegawai.index');
         
-        // Edit & Update Data Pegawai (Biasanya tugas HRD/Admin)
+        // Edit & Update
         Route::get('/pegawai/{pegawai}/edit', [PegawaiController::class, 'edit'])->name('pegawai.edit');
         Route::put('/pegawai/{pegawai}', [PegawaiController::class, 'update'])->name('pegawai.update');
-        Route::patch('/pegawai/{pegawai}', [PegawaiController::class, 'update']); // Support PATCH too
+        Route::patch('/pegawai/{pegawai}', [PegawaiController::class, 'update']);
         
-        // Hapus Pegawai
+        // Hapus
         Route::delete('/pegawai/{pegawai}', [PegawaiController::class, 'destroy'])->name('pegawai.destroy');
     });
 
