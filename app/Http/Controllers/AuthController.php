@@ -9,6 +9,13 @@ class AuthController extends Controller
 {
     public function login(Request $request)
     {
+
+        // 🔒 JIKA INI REQUEST REGISTER → STOP
+        if ($request->has('register')) {
+            return back();
+        }
+
+        // VALIDASI LOGIN
         $credentials = $request->validate([
             'username' => 'required|string',
             'password' => 'required|string',
@@ -27,6 +34,15 @@ class AuthController extends Controller
 
         $user = Auth::user();
 
+        // VALIDASI REGISTER
+
+        $request->validate([
+            'username' => 'required|unique:users',
+            'password' => 'required|min:8|confirmed',
+        ], [
+            'password.confirmed' => 'Password tidak sama',
+        ]);
+
         // ADMIN
         if ($user->role === 'admin') {
             return response()->json([
@@ -40,6 +56,14 @@ class AuthController extends Controller
                 'redirect' => route('pegawai.create')
             ]);
         }
+
+        //Password salah
+        if (!Auth::attempt($request->only('username', 'password'))) {
+            return back()->withErrors([
+                'password' => 'Password salah'
+            ])->withInput();
+        }
+
 
         // USER BIASA
         return response()->json([

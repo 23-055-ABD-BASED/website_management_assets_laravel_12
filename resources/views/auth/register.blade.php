@@ -67,32 +67,79 @@
                         <!-- PASSWORD -->
                         <div>
                             <x-input-label for="password" value="Password" class="text-[#444444]" />
-                            <x-text-input
-                                id="password"
-                                name="password"
-                                type="password"
-                                required
-                                class="mt-1 w-full rounded-lg border-gray-300 focus:border-[#fd2800] focus:ring-[#fd2800]"
-                            />
+
+                            <div class="relative">
+                                <x-text-input
+                                    id="register_password"
+                                    name="password"
+                                    type="password"
+                                    required
+                                    data-password
+                                    class="mt-1 w-full rounded-lg border-gray-300 focus:border-[#fd2800] focus:ring-[#fd2800] pr-10"
+                                />
+                                <button
+                                    type="button"
+                                    onclick="togglePassword('register_password', this)"
+                                    class="absolute inset-y-0 right-3 flex items-center"
+                                >
+                                    <img
+                                        src="{{ asset('images/visible.png') }}"
+                                        class="eye-open w-5 h-5"
+                                    >
+                                    <img
+                                        src="{{ asset('images/hide.png') }}"
+                                        class="eye-closed w-5 h-5 hidden"
+                                    >
+                                </button>
+
+                            </div>
+
                             <x-input-error :messages="$errors->get('password')" class="mt-2" />
                         </div>
 
                         <!-- CONFIRM PASSWORD -->
                         <div>
                             <x-input-label for="password_confirmation" value="Confirm Password" class="text-[#444444]" />
-                            <x-text-input
-                                id="password_confirmation"
-                                name="password_confirmation"
-                                type="password"
-                                required
-                                class="mt-1 w-full rounded-lg border-gray-300 focus:border-[#fd2800] focus:ring-[#fd2800]"
-                            />
-                            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+
+                            <div class="relative">
+                                <x-text-input
+                                    id="register_password_confirmation"
+                                    name="password_confirmation"
+                                    type="password"
+                                    required
+                                    data-confirm-password
+                                    class="mt-1 w-full rounded-lg border-gray-300 focus:border-[#fd2800] focus:ring-[#fd2800] pr-10"
+                                />
+
+                                <p id="password-error"
+                                class="text-red-500 text-sm mt-1 hidden">
+                                    Password tidak sama
+                                </p>
+
+                                <button
+                                    type="button"
+                                    onclick="togglePassword('register_password_confirmation', this)"
+                                    class="absolute inset-y-0 right-3 flex items-center"
+                                >
+                                    <img
+                                        src="{{ asset('images/visible.png') }}"
+                                        class="eye-open w-5 h-5"
+                                    >
+                                    <img
+                                        src="{{ asset('images/hide.png') }}"
+                                        class="eye-closed w-5 h-5 hidden"
+                                    >
+                                </button>
+
+                            </div>
+
+                            <x-input-error :messages="$errors->get('password')" class="mt-2" />
                         </div>
 
                         <!-- REGISTER BUTTON -->
                         <button
                             type="submit"
+                            name="register"
                             class="w-full py-3 rounded-lg bg-[#fd2800] text-white font-semibold hover:opacity-90 transition"
                         >
                             Register
@@ -114,3 +161,63 @@
         </div>
     </div>
 </x-guest-layout>
+
+{{-- <script>
+function togglePassword(inputId, btn) {
+    const input = document.getElementById(inputId);
+
+    if (input.type === "password") {
+        input.type = "text";
+        btn.classList.add("text-[#fd2800]");
+    } else {
+        input.type = "password";
+        btn.classList.remove("text-[#fd2800]");
+    }
+}
+</script> --}}
+
+<script>
+function validateRegisterPassword() {
+
+    const password = document.querySelector('input[name="password"]');
+    const confirm  = document.querySelector('input[name="password_confirmation"]');
+    const errorMsg = document.getElementById('password-error');
+    const backendError = document.getElementById('backend-error');
+
+    if (!password || !confirm) return true;
+
+    if (password.value !== confirm.value) {
+        // tampilkan error client
+        errorMsg.classList.remove('hidden');
+
+        // sembunyikan error backend
+        if (backendError) {
+            backendError.style.display = 'none';
+        }
+
+        return false; // ⛔ STOP SUBMIT
+    }
+
+    errorMsg.classList.add('hidden');
+    return true;
+}
+</script>
+
+
+<script>
+function togglePassword(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const eyeOpen = btn.querySelector('.eye-open');
+    const eyeClosed = btn.querySelector('.eye-closed');
+
+    if (input.type === "password") {
+        input.type = "text";
+        eyeOpen.classList.add("hidden");
+        eyeClosed.classList.remove("hidden");
+    } else {
+        input.type = "password";
+        eyeOpen.classList.remove("hidden");
+        eyeClosed.classList.add("hidden");
+    }
+}
+</script>

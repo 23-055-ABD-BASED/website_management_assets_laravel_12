@@ -112,58 +112,73 @@ document.addEventListener("DOMContentLoaded", () => {
     const registerForm = document.getElementById("register-form");
 
     if (registerForm) {
-        registerForm.addEventListener("submit", async (e) => {
-            e.preventDefault();
+    registerForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-            const formData = new FormData(registerForm);
-            const token = registerForm.querySelector('input[name="_token"]').value;
+        const password = registerForm.querySelector('input[name="password"]');
+        const confirm  = registerForm.querySelector('input[name="password_confirmation"]');
+        const errorMsg = document.getElementById('password-error');
 
-            try {
-                const response = await fetch(registerForm.action, {
-                    method: "POST",
-                    credentials: "include", // 🔥 UBAH dari same-origin ke include
-                    headers: {
-                        "X-Requested-With": "XMLHttpRequest",
-                        "Accept": "application/json",
-                        "X-CSRF-TOKEN": token,
-                    },
-                    body: formData,
-                });
+        // 🔴 VALIDASI PASSWORD DULU
+        if (password.value !== confirm.value) {
+            errorMsg.classList.remove('hidden');
+            return; // ⛔ STOP DI SINI (tidak kirim ke backend)
+        }
 
-                const data = await response.json();
+        // ✅ PASSWORD SAMA → LANJUT
+        errorMsg.classList.add('hidden');
 
-                if (response.status === 422) {
-                    Swal.fire({
-                        icon: "error",
-                        title: "Registrasi Gagal",
-                        text: data.errors?.username?.[0] ?? "Registrasi gagal",
-                        timer: 1500,
-                        showConfirmButton: false,
-                    });
-                    return;
-                }
+        const formData = new FormData(registerForm);
+        const token = registerForm.querySelector('input[name="_token"]').value;
 
-                if (!response.ok) {
-                    throw new Error("Server error");
-                }
+        try {
+            const response = await fetch(registerForm.action, {
+                method: "POST",
+                credentials: "include",
+                headers: {
+                    "X-Requested-With": "XMLHttpRequest",
+                    "Accept": "application/json",
+                    "X-CSRF-TOKEN": token,
+                },
+                body: formData,
+            });
 
+            const data = await response.json();
+
+            // ❌ ERROR BACKEND (username sudah ada dll)
+            if (response.status === 422) {
                 Swal.fire({
-                    icon: "success",
-                    title: "Registrasi Berhasil",
-                    text: "Akun berhasil dibuat",
-                    timer: 1000,
+                    icon: "error",
+                    title: "Registrasi Gagal",
+                    text: data.errors?.username?.[0] ?? "Registrasi gagal",
+                    timer: 1500,
                     showConfirmButton: false,
-                }).then(() => {
-                    document.body.classList.remove("show");
-                    setTimeout(() => {
-                        window.location.href = data.redirect;
-                    }, 300);
                 });
-
-            } catch (err) {
-                Swal.fire("Error", "Terjadi kesalahan server", "error");
+                return;
             }
-        });
-    }
+
+            if (!response.ok) {
+                throw new Error("Server error");
+            }
+
+            // ✅ BERHASIL
+            Swal.fire({
+                icon: "success",
+                title: "Registrasi Berhasil",
+                text: "Akun berhasil dibuat",
+                timer: 1000,
+                showConfirmButton: false,
+            }).then(() => {
+                document.body.classList.remove("show");
+                setTimeout(() => {
+                    window.location.href = data.redirect;
+                }, 300);
+            });
+
+        } catch (err) {
+            Swal.fire("Error", "Terjadi kesalahan server", "error");
+        }
+    });
+}
 
 });

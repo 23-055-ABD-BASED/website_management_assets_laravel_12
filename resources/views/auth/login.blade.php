@@ -70,13 +70,34 @@
                         <!-- PASSWORD -->
                         <div>
                             <x-input-label for="password" value="Password" class="text-[#444444]" />
-                            <x-text-input
-                                id="password"
-                                name="password"
-                                type="password"
-                                required
-                                class="mt-1 w-full rounded-lg border-gray-300 focus:border-[#fd2800] focus:ring-[#fd2800]"
-                            />
+
+                            <div class="relative">
+                                <x-text-input
+                                    id="login_password"
+                                    name="password"
+                                    type="password"
+                                    required
+                                    class="mt-1 w-full rounded-lg border-gray-300 focus:border-[#fd2800] focus:ring-[#fd2800] pr-10"
+                                />
+
+                                <!-- ICON MATA -->
+                                <button
+                                    type="button"
+                                    onclick="togglePassword('login_password', this)"
+                                    class="absolute inset-y-0 right-3 flex items-center"
+                                >
+                                    <img
+                                        src="{{ asset('images/visible.png') }}"
+                                        class="eye-open w-5 h-5"
+                                    >
+                                    <img
+                                        src="{{ asset('images/hide.png') }}"
+                                        class="eye-closed w-5 h-5 hidden"
+                                    >
+                                </button>
+
+                            </div>
+
                             <x-input-error :messages="$errors->get('password')" class="mt-2" />
                         </div>
 
@@ -119,3 +140,35 @@
         </div>
     </div>
 </x-guest-layout>
+
+<script>
+function togglePassword(inputId, btn) {
+    const input = document.getElementById(inputId);
+
+    if (input.type === "password") {
+        input.type = "text";
+        btn.classList.add("text-[#fd2800]");
+    } else {
+        input.type = "password";
+        btn.classList.remove("text-[#fd2800]");
+    }
+}
+</script>
+
+<script>
+function togglePassword(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const eyeOpen = btn.querySelector('.eye-open');
+    const eyeClosed = btn.querySelector('.eye-closed');
+
+    if (input.type === "password") {
+        input.type = "text";
+        eyeOpen.classList.add("hidden");
+        eyeClosed.classList.remove("hidden");
+    } else {
+        input.type = "password";
+        eyeOpen.classList.remove("hidden");
+        eyeClosed.classList.add("hidden");
+    }
+}
+</script>
