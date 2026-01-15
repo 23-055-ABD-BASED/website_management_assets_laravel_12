@@ -1,3 +1,14 @@
+@php
+    $kategoriList = [
+        'Elektronik',
+        'Furniture',
+        'Kendaraan',
+        'Peralatan Kantor',
+        'Inventaris IT',
+    ];
+@endphp
+
+
 <x-app-layout>
     <div class="min-h-screen bg-gray-50 py-10 font-sans text-slate-600">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -32,14 +43,26 @@
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <svg class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
                                 </div>
-                                <input type="text" name="kode_aset"
-                                    class="pl-10 block w-full rounded-xl border-slate-200 shadow-sm focus:border-[#fd2800] focus:ring-[#fd2800] sm:text-sm py-2.5 bg-slate-50 focus:bg-white transition-colors"
-                                    placeholder="Contoh: AST-2024-001"
-                                    value="{{ old('kode_aset', $aset->kode_aset ?? '') }}"
+                                <input type="text"
+                                    name="kode_aset_suffix"
+                                    maxlength="4"
+                                    inputmode="numeric"
+                                    pattern="[0-9]{4}"
+                                    class="pl-10 block w-full rounded-xl border-slate-200 shadow-sm
+                                        focus:border-[#fd2800] focus:ring-[#fd2800]
+                                        sm:text-sm py-2.5 bg-slate-50 focus:bg-white transition-colors"
+                                    placeholder="Contoh: 0001"
+                                    value="{{ old('kode_aset_suffix', isset($aset) ? substr($aset->kode_aset, -4) : '') }}"
                                     required>
                             </div>
-                            <p class="mt-1 text-xs text-slate-400">Nomor unik identifikasi barang.</p>
-                            @error('kode_aset') <p class="text-[#fd2800] text-xs mt-1 font-bold">{{ $message }}</p> @enderror
+                            <p class="mt-1 text-xs text-slate-400">
+                                Masukkan 4 digit angka. Contoh: 0001
+                            </p>
+                            @error('kode_aset_suffix')
+                                <p class="text-[#fd2800] text-xs mt-1 font-bold">
+                                    {{ $message }}
+                                </p>
+                            @enderror
                         </div>
 
                         <div class="col-span-1">
@@ -64,16 +87,35 @@
                             <label class="block text-sm font-bold text-[#171717] mb-2">
                                 Kategori
                             </label>
+
                             <div class="relative">
-                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <svg class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-                                </div>
-                                <input type="text" name="kategori_aset"
-                                    class="pl-10 block w-full rounded-xl border-slate-200 shadow-sm focus:border-[#fd2800] focus:ring-[#fd2800] sm:text-sm py-2.5 bg-slate-50 focus:bg-white transition-colors"
-                                    placeholder="Contoh: Elektronik / Furniture"
-                                    value="{{ old('kategori_aset', $aset->kategori_aset ?? '') }}">
+                                <select
+                                    name="kategori_aset"
+                                    class="block w-full rounded-xl border-slate-200 shadow-sm
+                                        focus:border-[#fd2800] focus:ring-[#fd2800]
+                                        sm:text-sm py-2.5 bg-slate-50 text-slate-700"
+                                    required
+                                >
+                                    <option value="">-- Pilih Kategori --</option>
+
+                                    @foreach ($kategoriList as $kategori)
+                                        <option value="{{ $kategori }}"
+                                            {{ old('kategori_aset', $aset->kategori_aset ?? '') == $kategori ? 'selected' : '' }}>
+                                            {{ $kategori }}
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
-                            @error('kategori_aset') <p class="text-[#fd2800] text-xs mt-1 font-bold">{{ $message }}</p> @enderror
+
+                            <p class="mt-1 text-xs text-slate-400">
+                                Kategori aset.
+                            </p>
+
+                            @error('kategori_aset')
+                                <p class="text-[#fd2800] text-xs mt-1 font-bold">
+                                    {{ $message }}
+                                </p>
+                            @enderror
                         </div>
 
                         <div class="hidden md:block"></div>
