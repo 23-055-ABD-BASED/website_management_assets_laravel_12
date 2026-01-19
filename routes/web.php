@@ -169,4 +169,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/admin/check-pending', [PeminjamanController::class, 'checkPending'])->name('admin.check.pending');
     });
 
+    // cetak PDF
+    Route::get('/admin/peminjaman/cetak-pdf', [PeminjamanController::class, 'cetakPdf'])->name('admin.peminjaman.cetak-pdf');
+
+
 });

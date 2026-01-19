@@ -253,6 +253,41 @@
                 </div>
 
                 <div x-show="activeTab === 'history'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-cloak>
+                    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-6 px-6 pt-6">
+
+                        <div class="flex gap-3">
+                            <!-- Bulan -->
+                            <div>
+                                <label class="text-xs font-semibold text-gray-500">Bulan</label>
+                                <select name="bulan" id="bulan"
+                                    class="mt-1 rounded-lg border-gray-300 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    @foreach(range(1,12) as $m)
+                                        <option value="{{ $m }}">{{ \Carbon\Carbon::create()->month($m)->translatedFormat('F') }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <!-- Tahun -->
+                            <div>
+                                <label class="text-xs font-semibold text-gray-500">Tahun</label>
+                                <select name="tahun" id="tahun"
+                                    class="mt-1 rounded-lg border-gray-300 text-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    @foreach($tahunList as $tahun)
+                                        <option value="{{ $tahun }}">{{ $tahun }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Tombol Cetak -->
+                        <button onclick="cetakPDF()"
+                            class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5
+                                text-sm font-semibold text-white hover:bg-indigo-700 shadow-sm">
+                            🖨️ Cetak PDF
+                        </button>
+
+                    </div>
+
                     <div class="overflow-x-auto rounded-b-2xl">
                         <table class="min-w-full divide-y divide-gray-100">
                             <thead>
@@ -396,4 +431,13 @@
         });
     });
     </script>
+    <script>
+    function cetakPDF() {
+        const bulan = document.getElementById('bulan').value;
+        const tahun = document.getElementById('tahun').value;
+
+        window.open(`/admin/peminjaman/cetak-pdf?bulan=${bulan}&tahun=${tahun}`, '_blank');
+    }
+    </script>
+
 </x-app-layout>

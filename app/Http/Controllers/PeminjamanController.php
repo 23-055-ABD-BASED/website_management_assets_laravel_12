@@ -8,6 +8,7 @@ use App\Models\Aset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PeminjamanController extends Controller
 {
@@ -106,8 +107,12 @@ class PeminjamanController extends Controller
                 ->latest()
                 ->limit(50)
                 ->get();
+    $tahunList = Peminjaman::selectRaw('YEAR(updated_at) as tahun')
+        ->distinct()
+        ->orderBy('tahun', 'desc')
+        ->pluck('tahun');
 
-    return view('admin.peminjaman.index', compact('pending', 'active', 'history'));
+    return view('admin.peminjaman.index', compact('pending', 'active', 'history', 'tahunList'));
 }
     public function indexUser()
     {
@@ -176,7 +181,32 @@ class PeminjamanController extends Controller
 
     return back()->with('success', 'Aset berhasil dikembalikan. Stok dan kondisi telah diperbarui.');
 }
+    // cetak PDF
+    public function cetakPdf(Request $request)
+{
+    $bulan = $request->bulan;
+    $tahun = $request->tahun;
 
+    $namaBulan = Carbon::create()
+        ->month((int) $bulan)
+        ->translatedFormat('F');
 
+    $data = Peminjaman::with(['pegawai', 'aset'])
+        ->where('status', 'kembali')
+        ->whereMonth('updated_at', $bulan)
+        ->whereYear('updated_at', $tahun)
+        ->orderBy('updated_at', 'asc')
+        ->get();
+
+    $pdf = Pdf::loadView('admin.peminjaman.pdf', [
+        'data'  => $data,
+        'bulan' => $namaBulan,
+        'tahun' => $tahun,
+    ])->setPaper('A4', 'portrait');
+
+    return $pdf->stream(
+        'Riwayat_Peminjaman_Aset_' . $bulan . '_' . $tahun . '.pdf'
+    );
+}
 
 }
