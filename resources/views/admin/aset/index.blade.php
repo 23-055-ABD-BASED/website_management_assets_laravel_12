@@ -95,7 +95,7 @@
 
                                     {{-- Aksi --}}
                                     <td class="px-6 py-4 text-center">
-                                        <div class="flex items-center justify-center gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-200">
+                                        <div class="flex items-center justify-center gap-2">
                                             
                                             {{-- Edit --}}
                                             <a href="{{ route('admin.aset.edit', $a) }}" 

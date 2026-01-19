@@ -32,5 +32,65 @@
                 {{ $slot }}
             </main>
         </div>
-    </body>
+        @if(auth()->check() && auth()->user()->role === 'admin')
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script> <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let lastCount = 0; // Menyimpan jumlah terakhir
+            let isFirstLoad = true; // Agar tidak bunyi saat pertama kali buka halaman
+
+            // Fungsi untuk mengecek ke server
+            function checkNewRequests() {
+                axios.get('{{ route("admin.check.pending") }}')
+                    .then(function (response) {
+                        let currentCount = response.data.count;
+                        
+                        // Update angka di Badge Menu (jika ada elemen dengan ID 'pending-badge')
+                        let badge = document.getElementById('pending-badge');
+                        if(badge) {
+                            badge.innerText = currentCount;
+                            // Sembunyikan jika 0
+                            badge.style.display = currentCount > 0 ? 'inline-flex' : 'none';
+                        }
+
+                        // Logika Notifikasi
+                        if (currentCount > lastCount && !isFirstLoad) {
+                            // Mainkan Suara 'Ting'
+                            let audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+                            audio.play().catch(e => console.log('Audio play blocked'));
+
+                            // Munculkan Popup Pojok Kanan Atas
+                            Swal.fire({
+                                icon: 'info',
+                                title: 'Permintaan Baru!',
+                                text: 'Ada ' + (currentCount - lastCount) + ' pengajuan aset baru masuk.',
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 5000,
+                                timerProgressBar: true,
+                                didOpen: (toast) => {
+                                    toast.addEventListener('click', () => {
+                                        window.location.href = "{{ route('admin.peminjaman.index') }}";
+                                    });
+                                }
+                            });
+                        }
+
+                        lastCount = currentCount;
+                        isFirstLoad = false;
+                    })
+                    .catch(function (error) {
+                        console.log('Polling error:', error);
+                    });
+            }
+
+            // Jalankan pengecekan pertama kali
+            checkNewRequests();
+
+            // Jalankan pengecekan setiap 5 detik (5000 ms)
+            setInterval(checkNewRequests, 5000);
+        });
+    </script>
+    @endif
+</body>
 </html>

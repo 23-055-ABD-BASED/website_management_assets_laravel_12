@@ -41,11 +41,9 @@
                             <div>
                                 <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Pegawai</p>
                                 
-                                {{-- Menggunakan Data Realtime dari Route --}}
                                 <div class="flex items-baseline gap-2">
                                     <h3 class="text-3xl font-black text-[#171717] mt-2">{{ $stats['pegawai']['total'] }}</h3>
                                     
-                                    {{-- Indikator Pertumbuhan --}}
                                     @if($stats['pegawai']['diff'] != 0)
                                         <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-md {{ $stats['pegawai']['is_positive'] ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
                                             {{ $stats['pegawai']['is_positive'] ? '+' : '' }}{{ $stats['pegawai']['percentage'] }}%
@@ -72,7 +70,6 @@
                     </div>
 
                     {{-- Card 2: User System (MENGGANTIKAN ATAU MENAMBAHKAN STATISTIK USER) --}}
-                    {{-- Disini saya menggunakan slot Statistik User (Logika Pertambahan User) --}}
                     <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 relative overflow-hidden group hover:shadow-md transition-all duration-300">
                         <div class="flex justify-between items-start z-10 relative">
                             <div>
@@ -111,7 +108,6 @@
                                 <div class="flex items-baseline gap-2">
                                     <h3 class="text-3xl font-black text-[#171717] mt-2">{{ $stats['aset']['total'] }}</h3>
                                     
-                                    {{-- Indikator Pertumbuhan Aset --}}
                                     @if($stats['aset']['diff'] != 0)
                                         <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-md {{ $stats['aset']['is_positive'] ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
                                             {{ $stats['aset']['is_positive'] ? '+' : '' }}{{ $stats['aset']['percentage'] }}%
@@ -139,7 +135,6 @@
 
                     {{-- Card 4: Action Button (Add Pegawai) --}}
                     <button @click="showModal = true" class="group relative rounded-2xl p-6 overflow-hidden text-left shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
-                        {{-- Background Image/Gradient --}}
                         <div class="absolute inset-0 bg-gradient-to-br from-[#171717] to-[#2d2d2d]"></div>
                         <div class="absolute top-0 right-0 w-32 h-32 bg-[#fd2800] rounded-full blur-[60px] opacity-20 group-hover:opacity-40 transition-opacity"></div>
                         
@@ -160,7 +155,6 @@
                 {{-- 3. CONTENT SPLIT --}}
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     
-                    {{-- LEFT COLUMN: TABLE (Using $latestPegawai variable passed from route) --}}
                     <div class="lg:col-span-2 space-y-6">
                         <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
                             <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-white">
@@ -184,12 +178,10 @@
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-slate-100">
-                                        {{-- MENGGUNAKAN VARIABEL $latestPegawai DARI ROUTE --}}
                                         @forelse($latestPegawai as $pegawai)
                                         <tr class="hover:bg-slate-50 transition duration-150">
                                             <td class="px-6 py-4">
                                                 <div class="flex items-center gap-4">
-                                                    {{-- Avatar Initials --}}
                                                     <div class="w-10 h-10 rounded-full bg-[#171717] flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-sm">
                                                         {{ substr($pegawai->nama_pegawai, 0, 2) }}
                                                     </div>
@@ -232,7 +224,6 @@
                             </div>
                         </div>
 
-                        {{-- TAMBAHAN: TABEL ASET TERBARU (Opsional jika ingin ditampilkan, data sudah ada di controller) --}}
                     </div>
 
                     {{-- RIGHT COLUMN: SIDEBAR --}}
@@ -287,7 +278,7 @@
                                 <div>
                                     <span class="text-slate-400 block mb-1">Server Load</span>
                                     <div class="w-full bg-white/10 rounded-full h-1.5">
-                                        <div class="bg-[#fd2800] h-1.5 rounded-full" style="width: 35%"></div>
+                                        <div class="bg-[#fd2800] h-1.5 rounded-full" style="width: 100%"></div>
                                     </div>
                                 </div>
                             </div>
@@ -344,7 +335,6 @@
                     <form action="{{ route('pegawai.store') }}" method="POST">
                         @csrf
                         <div class="px-6 py-6 space-y-5">
-                            {{-- Input: User (Menggunakan variabel $users dari route) --}}
                             <div class="space-y-1.5">
                                 <label class="block text-sm font-semibold text-[#171717]">Tautkan Akun User <span class="text-[#fd2800]">*</span></label>
                                 <div class="relative">

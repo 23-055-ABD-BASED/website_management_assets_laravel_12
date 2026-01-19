@@ -16,4 +16,8 @@ class Aset extends Model
         'kondisi_aset',
         'status_aset',
     ];
+    public function peminjaman()
+    {
+        return $this->hasMany(Peminjaman::class, 'id_aset', 'id_aset');
+    }
 }
