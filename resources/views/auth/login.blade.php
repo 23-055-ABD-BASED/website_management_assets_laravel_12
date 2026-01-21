@@ -11,10 +11,10 @@
                 <!-- IMAGE -->
                 <div
                     class="absolute inset-0 bg-cover bg-center opacity-100"
-                    style="background-image: url('{{ asset('images/ilustrasi.jpg') }}');"
+                    style="background-image: url('{{ asset('images/regfive.jpg') }}');"
                 ></div>
 
-                <!-- BLOBS -->
+                {{-- <!-- BLOBS -->
                 <svg
                     class="absolute inset-0 w-full h-full pointer-events-none"
                     viewBox="0 0 900 600"
@@ -33,7 +33,7 @@
                         transform="translate(0, 770) scale(1.3)"
                         d="M0 -270.4C15.5 -270 30.9 -269.6 39.6 -249.9C48.2 -230.1 50.1 -191 58.4 -179.7C66.7 -168.5 81.3 -185.2 101.7 -199.6C122 -214 148.1 -226 158.9 -218.8C169.8 -211.5 165.5 -185 166.9 -166.9C168.3 -148.8 175.3 -139.1 169.9 -123.4C164.4 -107.8 146.5 -86.2 147 -74.9C147.6 -63.7 166.7 -62.8 176.9 -57.5C187.1 -52.2 188.4 -42.4 202.5 -32.1C216.6 -21.7 243.5 -10.9 270.4 0L0 0Z"
                     />
-                </svg>
+                </svg> --}}
             </div>
 
             <!-- ========== RIGHT SIDE (FORM) ========== -->
