@@ -10,7 +10,7 @@
             <div class="md:flex md:items-center md:justify-between">
                 <div class="min-w-0 flex-1">
                     <h2 class="text-2xl font-bold leading-7 text-white sm:truncate sm:text-3xl sm:tracking-tight">
-                        Halo, {{ auth()->user()->username ?? 'User' }} 👋
+                        Halo, {{ auth()->user()->username ?? 'User' }}
                     </h2>
                     <p class="mt-2 text-sm text-blue-100">
                         Selamat datang di Sistem Manajemen Aset.
