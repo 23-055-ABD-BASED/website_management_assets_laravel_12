@@ -61,35 +61,27 @@ class AsetController extends Controller
 
     public function store(Request $request)
     {
-        // Gabungkan kode aset dulu untuk pengecekan unique manual atau validasi custom jika perlu
-        // Di sini kita validasi format suffix-nya saja
+        // Validasi awal
         $request->validate(
             [
                 'kode_aset_suffix' => ['required', 'digits:4'],
                 'nama_aset'       => ['required'],
-                'kategori_aset'   => ['required', Rule::in([
-                    'Elektronik',
-                    'Furniture',
-                    'Kendaraan',
-                    'Peralatan Kantor',
-                    'Inventaris IT',
-                ])],
+                'kategori_aset'   => ['required'],
                 'kondisi_aset'    => ['required', 'in:baik,rusak'],
                 'status_aset'     => ['required', 'in:tersedia,digunakan,rusak'],
-            ],
-            [
-                'kode_aset_suffix.required' => '4 digit kode aset wajib diisi.',
-                'kode_aset_suffix.digits'   => 'Kode harus tepat 4 angka.',
             ]
         );
 
-        // Generate Kode Aset Dinamis (Format: AST-TAHUN-XXXX)
-        $tahun = date('Y');
-        $kodeAset = "AST-{$tahun}-" . $request->kode_aset_suffix;
+        // Gabungkan kode aset
+        $kodeAset = 'AST-2026-' . $request->kode_aset_suffix;
 
-        // Cek manual unique agar lebih akurat (opsional, untuk mencegah duplikat full code)
-        if(Aset::where('kode_aset', $kodeAset)->exists()){
-            return back()->withErrors(['kode_aset_suffix' => 'Kode aset ini sudah terdaftar tahun ini.'])->withInput();
+        // 🔴 CEK DUPLIKAT
+        if (Aset::where('kode_aset', $kodeAset)->exists()) {
+            return back()
+                ->withErrors([
+                    'kode_aset' => 'Kode aset sudah digunakan, silakan gunakan kode lain.'
+                ])
+                ->withInput();
         }
 
         // Simpan ke database
@@ -104,7 +96,7 @@ class AsetController extends Controller
         return redirect()
             ->route('admin.aset.index')
             ->with('success', 'Aset berhasil ditambahkan');
-    }
+}
 
 
     public function edit(Aset $aset)

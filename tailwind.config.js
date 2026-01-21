@@ -4,25 +4,20 @@ import forms from '@tailwindcss/forms';
 /** @type {import('tailwindcss').Config} */
 export default {
     content: [
+        './vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php',
+        './storage/framework/views/*.php',
+        './resources/views/**/*.blade.php',
         "./resources/**/*.blade.php",
         "./resources/**/*.js",
     ],
+
     theme: {
         extend: {
-            colors: {
-                brand: {
-                    primary: '#fd2800',
-                    dark: '#171717',
-                    gray: '#444444',
-                    light: '#ededed',
-                }
-            },
             fontFamily: {
-                heading: ['Poppins', 'Helvetica', 'Arial', 'sans-serif'],
-                body: ['Helvetica', 'Arial', 'sans-serif'],
-            }
+                sans: ['Poppins', ...defaultTheme.fontFamily.sans],
+            },
         },
     },
-    plugins: [],
-}
 
+    plugins: [forms],
+};
