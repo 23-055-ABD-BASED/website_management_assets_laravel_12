@@ -16,7 +16,7 @@
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #9ca3af; }
     </style>
 
-    <div class="min-h-screen bg-[#f8f9fa] pb-20 pt-8 font-body text-[#444444]" x-data="{ activeTab: 'active' }">
+    <div class="min-h-screen bg-[#f8f9fa] pb-20 pt-8 font-body text-[#444444]" x-data="{ activeTab: 'pending' }">
         <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             
             {{-- Header Section --}}
@@ -111,38 +111,100 @@
                     @else
                         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                             @foreach($pending as $item)
-                                <div class="group bg-white rounded-xl p-6 border border-[#ededed] hover:border-[#fd2800]/30 hover:shadow-lg transition-all duration-300 relative overflow-hidden">
-                                    <div class="absolute left-0 top-0 bottom-0 w-1 bg-[#fd2800]"></div>
-                                    <div class="flex justify-between items-start mb-4 pl-2">
+                                <div class="group bg-white rounded-2xl p-5 border border-[#ededed] shadow-sm hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:border-[#fd2800]/20 transition-all duration-300 flex flex-col h-full relative overflow-hidden">
+                                    
+                                    {{-- Decorative Status Line --}}
+                                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#fd2800] to-orange-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300 origin-left"></div>
+
+                                    {{-- HEADER: User Info --}}
+                                    <div class="flex justify-between items-start mb-4">
                                         <div class="flex items-center gap-3">
-                                            <div class="h-10 w-10 rounded-full bg-[#171717] flex items-center justify-center text-white font-bold text-sm font-heading">
-                                                {{ substr($item->pegawai->nama_pegawai, 0, 1) }}
+                                            <div class="relative">
+                                                <div class="h-11 w-11 rounded-full bg-[#171717] flex items-center justify-center text-white font-bold text-sm font-heading shadow-md">
+                                                    {{ substr($item->pegawai->nama_pegawai, 0, 1) }}
+                                                </div>
+                                                {{-- Online/Status Indicator --}}
+                                                <div class="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 bg-green-500 border-2 border-white rounded-full"></div>
                                             </div>
                                             <div>
-                                                <h4 class="font-bold text-[#171717] text-sm font-heading line-clamp-1">{{ $item->pegawai->nama_pegawai }}</h4>
-                                                <p class="text-xs text-[#444444]">{{ $item->created_at->diffForHumans() }}</p>
+                                                <h4 class="font-bold text-[#171717] text-sm font-heading line-clamp-1 leading-tight">{{ $item->pegawai->nama_pegawai }}</h4>
+                                                <p class="text-[11px] text-[#888888] font-medium mt-0.5 flex items-center gap-1">
+                                                    <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                                    {{ $item->created_at->diffForHumans() }}
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="bg-[#f8f9fa] rounded-lg p-4 mb-5 border border-[#ededed] pl-4 ml-2">
-                                        <p class="text-xs text-[#fd2800] font-bold uppercase tracking-wider mb-1 font-heading">Mengajukan Peminjaman</p>
-                                        <p class="text-base font-bold text-[#171717] mb-1 font-heading">{{ $item->aset->nama_aset }}</p>
-                                        <p class="text-xs font-mono text-[#444444] bg-[#ededed] inline-block px-2 py-0.5 rounded">{{ $item->aset->kode_aset }}</p>
-                                        <div class="mt-4 pt-3 border-t border-[#ededed] flex items-center justify-between text-xs text-[#444444]">
-                                            <span class="flex items-center gap-1">Durasi:</span>
-                                            <span class="font-bold text-[#171717]">{{ \Carbon\Carbon::parse($item->tanggal_pinjam)->diffInDays($item->tanggal_kembali) + 1 }} Hari</span>
+
+                                    {{-- BODY: Asset Info --}}
+                                    <div class="bg-[#f8f9fa] rounded-xl p-4 border border-[#f1f1f1] group-hover:bg-[#fff5f2] group-hover:border-[#ffe0db] transition-colors duration-300">
+                                        <div class="flex items-start justify-between mb-2">
+                                            <div>
+                                                <p class="text-[10px] font-bold text-[#fd2800] uppercase tracking-wider font-heading mb-1">Peminjaman Aset</p>
+                                                <h3 class="text-base font-bold text-[#171717] font-heading leading-tight">{{ $item->aset->nama_aset }}</h3>
+                                            </div>
+                                            <div class="bg-white p-1.5 rounded-lg shadow-sm border border-[#ededed]">
+                                                <svg class="w-5 h-5 text-[#444444]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="flex items-center gap-2 mt-2">
+                                            <span class="px-2 py-1 rounded-md bg-white border border-[#ededed] text-[10px] font-mono text-[#444444] font-medium">
+                                                {{ $item->aset->kode_aset }}
+                                            </span>
+                                            <span class="text-[#ededed]">|</span>
+                                            <span class="text-xs font-medium text-[#444444] flex items-center gap-1">
+                                                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                                                {{ \Carbon\Carbon::parse($item->tanggal_pinjam)->diffInDays($item->tanggal_kembali) + 1 }} Hari
+                                            </span>
                                         </div>
                                     </div>
-                                    <div class="flex items-center gap-3 pl-2">
+
+                                    {{-- BODY: Keperluan (New Feature) --}}
+                                    <div class="mt-4 mb-auto" x-data="{ open: false }">
+                                        <div class="relative pl-3 border-l-2 border-[#ededed] transition-colors duration-300" :class="open ? 'border-[#fd2800]' : ''">
+                                            <button @click="open = !open" class="flex items-center justify-between w-full group/btn text-left">
+                                                <span class="text-xs font-bold text-[#444444] group-hover/btn:text-[#171717] font-heading flex items-center gap-1.5">
+                                                    <svg class="w-3.5 h-3.5 text-[#888888]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" /></svg>
+                                                    Keperluan / Catatan
+                                                </span>
+                                                <svg class="w-3 h-3 text-[#888888] transform transition-transform duration-200" :class="open ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                                </svg>
+                                            </button>
+                                            
+                                            <div x-show="open" 
+                                                x-collapse 
+                                                x-cloak
+                                                class="mt-2 text-xs text-[#555555] italic leading-relaxed bg-gray-50 p-2 rounded-lg border border-dashed border-gray-200">
+                                                "{{ $item->alasan ?? 'Tidak ada keterangan detail.' }}"
+                                            </div>
+                                            
+                                            {{-- Preview Text (When Closed) --}}
+                                            <div x-show="!open" class="mt-1 text-xs text-[#888888] line-clamp-1 cursor-pointer" @click="open = true">
+                                                {{ $item->alasan ?? 'Tidak ada keterangan...' }}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {{-- FOOTER: Actions --}}
+                                    <div class="pt-5 mt-2 flex items-center gap-3 border-t border-[#f5f5f5]">
                                         <form action="{{ route('admin.peminjaman.reject', $item->id) }}" method="POST" class="flex-1">
                                             @csrf @method('PATCH')
-                                            <button type="submit" onclick="return confirm('Tolak permintaan ini?')" class="w-full py-2.5 px-3 bg-white border border-[#ededed] rounded-lg text-xs font-bold text-[#444444] font-heading hover:bg-[#ededed] hover:text-[#171717] transition-colors">Tolak</button>
+                                            <button type="submit" onclick="return confirm('Tolak permintaan ini?')" class="w-full py-2.5 px-3 rounded-lg border border-[#ededed] bg-white text-xs font-bold text-[#444444] font-heading hover:bg-gray-50 hover:text-[#171717] hover:border-gray-300 transition-all focus:ring-2 focus:ring-gray-200">
+                                                Tolak
+                                            </button>
                                         </form>
                                         <form action="{{ route('admin.peminjaman.approve', $item->id) }}" method="POST" class="flex-1">
                                             @csrf @method('PATCH')
-                                            <button type="submit" class="w-full py-2.5 px-3 bg-[#fd2800] border border-[#fd2800] rounded-lg text-xs font-bold text-white font-heading hover:bg-[#d62200] shadow-md shadow-red-500/20 transition-all">Setujui</button>
+                                            <button type="submit" class="w-full py-2.5 px-3 rounded-lg bg-[#fd2800] border border-[#fd2800] text-xs font-bold text-white font-heading hover:bg-[#d62200] hover:border-[#d62200] shadow-md shadow-red-500/20 hover:shadow-red-500/30 transform active:scale-95 transition-all focus:ring-2 focus:ring-red-200">
+                                                Setujui
+                                            </button>
                                         </form>
                                     </div>
+
                                 </div>
                             @endforeach
                         </div>
@@ -197,17 +259,21 @@
                                                 <td class="px-6 py-4 whitespace-nowrap">
                                                     <div class="text-sm text-[#444444] font-medium">{{ \Carbon\Carbon::parse($item->tanggal_kembali)->format('d M Y') }}</div>
                                                 </td>
-                                                <td class="px-6 py-4 whitespace-nowrap">
+                                               <td class="px-6 py-4 whitespace-nowrap">
                                                     @php
-                                                        $deadline = \Carbon\Carbon::parse($item->tanggal_kembali);
-                                                        $sisaHari = now()->diffInDays($deadline, false);
+                                                        // FIX: Gunakan startOfDay() agar perhitungan tidak terpengaruh jam saat ini
+                                                        $deadline = \Carbon\Carbon::parse($item->tanggal_kembali)->startOfDay();
+                                                        $now = now()->startOfDay();
+                                                        
+                                                        $sisaHari = $now->diffInDays($deadline, false);
                                                         $isLate = $sisaHari < 0;
                                                     @endphp
+
                                                     @if($isLate)
                                                         <div class="flex items-center gap-2 text-[#fd2800]">
                                                             <span class="relative flex h-2.5 w-2.5">
-                                                              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                                                              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#fd2800]"></span>
+                                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#fd2800]"></span>
                                                             </span>
                                                             <span class="text-xs font-bold font-heading">Telat {{ abs(intval($sisaHari)) }} Hari</span>
                                                         </div>
@@ -338,6 +404,8 @@
                 title: "{{ session('success') }}",
                 iconColor: '#fd2800'
             });
+
+            
         @endif
 
         // --- 2. LOGIC TOMBOL RETURN (Modern SweetAlert) ---
@@ -447,5 +515,17 @@
         const tahun = document.getElementById('tahun').value;
         window.open(`/admin/peminjaman/cetak-pdf?bulan=${bulan}&tahun=${tahun}`, '_blank');
     }
+
+    
     </script>
+@if(session('error'))
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Gagal Menyetujui',
+                text: "{{ session('error') }}",
+                confirmButtonColor: '#4f46e5'
+            });
+        </script>
+    @endif
 </x-app-layout>
