@@ -1,219 +1,243 @@
 <x-app-layout>
-    <div class="min-h-screen bg-gray-50 text-slate-600 font-sans">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    {{-- Import Fonts --}}
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        .font-heading { font-family: 'Poppins', sans-serif; }
+        .font-mono { font-family: 'JetBrains Mono', monospace; }
+        /* Hide scrollbar for stats container */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
 
-            {{-- HEADER SECTION --}}
-            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-                <div>
-                    <h2 class="text-2xl font-extrabold text-[#171717] tracking-tight">
-                        Manajemen Aset
-                    </h2>
-                    <p class="text-sm text-slate-500 mt-1">
-                        Daftar inventaris dan perlengkapan dinas.
-                    </p>
-                </div>
-
-                <a href="{{ route('admin.aset.create') }}" 
-                   class="inline-flex items-center justify-center gap-2 bg-[#fd2800] hover:bg-[#171717] text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-red-500/30 transition-all duration-300 transform hover:-translate-y-0.5">
-                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Tambah Aset Baru
-                </a>
-            </div>
-
-            {{-- TABLE CARD --}}
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left">
-                        
-                        <thead class="bg-slate-50/50 border-b border-slate-100 text-xs uppercase text-slate-500 font-bold tracking-wider">
-                            <tr>
-                                <th class="px-6 py-4">Kode Aset</th>
-                                <th class="px-6 py-4">Nama Barang</th>
-                                <th class="px-6 py-4">Kategori</th>
-                                <th class="px-6 py-4 text-center">Status</th>
-                                <th class="px-6 py-4 text-center">Kondisi</th>
-                                <th class="px-6 py-4 text-center">Aksi</th>
-                            </tr>
-                        </thead>
-
-                        <tbody class="divide-y divide-slate-100">
-                            @forelse($aset as $a)
-                                <tr class="hover:bg-slate-50/80 transition duration-150 group">
-                                    
-                                    {{-- Kode --}}
-                                    <td class="px-6 py-4 font-mono text-xs font-semibold text-[#fd2800]">
-                                        {{ $a->kode_aset }}
-                                    </td>
-
-                                    {{-- Nama --}}
-                                    <td class="px-6 py-4">
-                                        <div class="flex items-center gap-3">
-                                            <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400">
-                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
-                                            </div>
-                                            <span class="font-medium text-[#171717]">{{ $a->nama_aset }}</span>
-                                        </div>
-                                    </td>
-
-                                    {{-- Kategori --}}
-                                    <td class="px-6 py-4 text-slate-500">
-                                        {{ $a->kategori_aset }}
-                                    </td>
-
-                                    {{-- Status --}}
-                                    <td class="px-6 py-4 text-center">
-                                        @if($a->status_aset == 'tersedia')
-                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200/60">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Tersedia
-                                            </span>
-                                        @elseif($a->status_aset == 'digunakan')
-                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200/60">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Digunakan
-                                            </span>
-                                        @else
-                                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-700 border border-red-200/60">
-                                                <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> {{ ucfirst($a->status_aset) }}
-                                            </span>
-                                        @endif
-                                    </td>
-
-                                    {{-- Kondisi --}}
-                                    <td class="px-6 py-4 text-center">
-                                        @if($a->kondisi_aset == 'baik')
-                                            <span class="text-xs font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded-md border border-slate-200">
-                                                Baik
-                                            </span>
-                                        @else
-                                            <span class="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded-md border border-red-200">
-                                                {{ ucfirst($a->kondisi_aset) }}
-                                            </span>
-                                        @endif
-                                    </td>
-
-                                    {{-- Aksi --}}
-                                    <td class="px-6 py-4 text-center">
-                                        <div class="flex items-center justify-center gap-2">
-                                            
-                                            {{-- Edit --}}
-                                            <a href="{{ route('admin.aset.edit', $a) }}" 
-                                               class="p-2 bg-white border border-slate-200 rounded-lg text-slate-500 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition shadow-sm"
-                                               title="Edit Data">
-                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                                </svg>
-                                            </a>
-
-                                            {{-- Delete (Form Class added) --}}
-                                            <form method="POST" action="{{ route('admin.aset.destroy', $a) }}" class="form-delete">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" 
-                                                        class="p-2 bg-white border border-slate-200 rounded-lg text-slate-500 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition shadow-sm"
-                                                        title="Hapus Data">
-                                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                    </svg>
-                                                </button>
-                                            </form>
-
-                                        </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                {{-- Empty State --}}
-                                <tr>
-                                    <td colspan="6" class="px-6 py-12 text-center">
-                                        <div class="flex flex-col items-center justify-center">
-                                            <div class="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-                                                <svg class="w-8 h-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                                                </svg>
-                                            </div>
-                                            <p class="text-slate-500 font-medium">Belum ada data aset.</p>
-                                            <p class="text-xs text-slate-400 mt-1">Silakan tambahkan aset baru untuk memulai.</p>
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-
-                {{-- Pagination --}}
-                @if(method_exists($aset, 'links') && $aset->hasPages())
-                    <div class="px-6 py-4 border-t border-slate-100 bg-slate-50">
-                        {{ $aset->links() }}
+    <div class="min-h-screen bg-[#F8F9FA] text-slate-600 font-sans pb-24">
+        
+        {{-- HEADER & STATS --}}
+        <div class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm/50 bg-white/95 backdrop-blur-md">
+            <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    {{-- Title --}}
+                    <div>
+                        <h2 class="text-xl font-bold text-[#171717] font-heading tracking-tight flex items-center gap-2">
+                            <svg class="w-6 h-6 text-[#fd2800]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                            Katalog Aset
+                        </h2>
                     </div>
-                @endif
+
+                    {{-- Stats Pills --}}
+                    <div class="flex items-center gap-3 overflow-x-auto no-scrollbar">
+                        <div class="flex items-center gap-2 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg">
+                            <span class="text-[10px] uppercase font-bold text-slate-400">Total</span>
+                            <span class="text-sm font-bold text-[#171717]">{{ $stats['total'] ?? 0 }}</span>
+                        </div>
+                        <div class="flex items-center gap-2 px-3 py-1.5 bg-green-50 border border-green-100 rounded-lg">
+                            <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                            <span class="text-[10px] font-bold text-green-700 uppercase">Tersedia {{ $stats['tersedia'] ?? 0 }}</span>
+                        </div>
+                        <div class="flex items-center gap-2 px-3 py-1.5 bg-red-50 border border-red-100 rounded-lg">
+                            <div class="w-2 h-2 rounded-full bg-[#fd2800]"></div>
+                            <span class="text-[10px] font-bold text-red-700 uppercase">Rusak {{ $stats['rusak'] ?? 0 }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            
+            {{-- FILTER TOOLBAR --}}
+            <form action="{{ route('admin.aset.index') }}" method="GET" class="mb-8">
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col xl:flex-row gap-4 justify-between">
+                    
+                    {{-- Search --}}
+                    <div class="relative w-full xl:w-1/4">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                        </div>
+                        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama / kode aset..." 
+                               class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-[#fd2800] focus:border-[#fd2800] transition-all">
+                    </div>
+
+                    {{-- Filters Group --}}
+                    <div class="flex flex-col sm:flex-row gap-3 w-full xl:w-auto overflow-x-auto">
+                        
+                        {{-- Filter Kategori --}}
+                        <select name="kategori" onchange="this.form.submit()" class="w-full sm:w-auto pl-3 pr-8 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:ring-[#fd2800] focus:border-[#fd2800] cursor-pointer">
+                            <option value="">Semua Kategori</option>
+                            @foreach($kategoriList as $kat)
+                                <option value="{{ $kat }}" {{ request('kategori') == $kat ? 'selected' : '' }}>{{ $kat }}</option>
+                            @endforeach
+                        </select>
+
+                        {{-- Filter Status --}}
+                        <select name="status" onchange="this.form.submit()" class="w-full sm:w-auto pl-3 pr-8 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:ring-[#fd2800] focus:border-[#fd2800] cursor-pointer">
+                            <option value="">Semua Status</option>
+                            <option value="tersedia" {{ request('status') == 'tersedia' ? 'selected' : '' }}>Tersedia</option>
+                            <option value="digunakan" {{ request('status') == 'digunakan' ? 'selected' : '' }}>Digunakan</option>
+                            <option value="rusak" {{ request('status') == 'rusak' ? 'selected' : '' }}>Rusak</option>
+                        </select>
+
+                        {{-- Filter Kondisi --}}
+                        <select name="kondisi" onchange="this.form.submit()" class="w-full sm:w-auto pl-3 pr-8 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:ring-[#fd2800] focus:border-[#fd2800] cursor-pointer">
+                            <option value="">Semua Kondisi</option>
+                            <option value="baik" {{ request('kondisi') == 'baik' ? 'selected' : '' }}>Baik</option>
+                            <option value="rusak" {{ request('kondisi') == 'rusak' ? 'selected' : '' }}>Rusak</option>
+                        </select>
+
+                        {{-- Reset Button --}}
+                        @if(request()->hasAny(['search', 'kategori', 'status', 'kondisi']))
+                            <a href="{{ route('admin.aset.index') }}" class="inline-flex items-center justify-center px-4 py-2.5 bg-slate-100 text-slate-600 rounded-xl text-sm font-bold hover:bg-slate-200 transition-colors">
+                                Reset
+                            </a>
+                        @endif
+                    </div>
+
+                    {{-- Add Button --}}
+                    <div class="w-full xl:w-auto border-t xl:border-t-0 pt-4 xl:pt-0">
+                        <a href="{{ route('admin.aset.create') }}" 
+                           class="flex items-center justify-center gap-2 w-full bg-[#171717] hover:bg-[#fd2800] text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-lg shadow-gray-900/10 hover:shadow-red-500/30">
+                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+                            <span>Tambah Baru</span>
+                        </a>
+                    </div>
+                </div>
+            </form>
+
+            {{-- ASSET GRID (5 Columns) --}}
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5">
+                
+                @forelse($aset as $a)
+                    <div class="group bg-white rounded-2xl border border-slate-200 hover:border-[#fd2800]/50 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] transition-all duration-300 flex flex-col h-full relative overflow-hidden">
+                        
+                        {{-- Top Stripe --}}
+                        <div class="h-1.5 w-full {{ $a->kondisi_aset == 'baik' ? 'bg-gradient-to-r from-green-400 to-green-500' : 'bg-gradient-to-r from-red-500 to-[#fd2800]' }}"></div>
+
+                        <div class="p-5 flex flex-col h-full">
+                            
+                            {{-- Header: Code & Category --}}
+                            <div class="flex justify-between items-start mb-3">
+                                <div class="bg-slate-50 border border-slate-100 px-2 py-1 rounded text-[10px] font-mono font-bold text-slate-500 tracking-wide">
+                                    {{ $a->kode_aset }}
+                                </div>
+                                <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                                    {{ $a->kategori_aset }}
+                                </div>
+                            </div>
+
+                            {{-- Title --}}
+                            <div class="mb-4">
+                                <h3 class="text-[15px] font-bold text-[#171717] leading-snug group-hover:text-[#fd2800] transition-colors line-clamp-2">
+                                    {{ $a->nama_aset }}
+                                </h3>
+                            </div>
+
+                            {{-- Info Grid --}}
+                            <div class="mt-auto grid grid-cols-2 gap-2 text-xs border-t border-slate-50 pt-3 mb-4">
+                                {{-- Status --}}
+                                <div>
+                                    <p class="text-[10px] uppercase text-slate-400 font-bold mb-0.5">Status</p>
+                                    @if($a->status_aset == 'tersedia')
+                                        <span class="inline-flex items-center gap-1.5 font-bold text-green-700">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span> Tersedia
+                                        </span>
+                                    @elseif($a->status_aset == 'digunakan')
+                                        <span class="inline-flex items-center gap-1.5 font-bold text-amber-700">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Dipakai
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center gap-1.5 font-bold text-red-700">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span> {{ ucfirst($a->status_aset) }}
+                                        </span>
+                                    @endif
+                                </div>
+
+                                {{-- Kondisi --}}
+                                <div class="text-right">
+                                    <p class="text-[10px] uppercase text-slate-400 font-bold mb-0.5">Kondisi</p>
+                                    @if($a->kondisi_aset == 'baik')
+                                        <span class="font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">Baik</span>
+                                    @else
+                                        <span class="font-bold text-white bg-[#fd2800] px-2 py-0.5 rounded">Rusak</span>
+                                    @endif
+                                </div>
+                            </div>
+
+                            {{-- Actions --}}
+                            <div class="flex gap-2">
+                                <a href="{{ route('admin.aset.edit', $a) }}" class="flex-1 py-2 rounded-lg bg-slate-50 text-slate-600 text-xs font-bold text-center border border-slate-200 hover:bg-white hover:border-slate-300 hover:text-[#171717] transition-all">
+                                    Edit
+                                </a>
+                                <form method="POST" action="{{ route('admin.aset.destroy', $a) }}" class="form-delete">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="px-3 py-2 rounded-lg bg-white text-slate-400 border border-slate-200 hover:bg-red-50 hover:text-[#fd2800] hover:border-red-100 transition-all">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                    </button>
+                                </form>
+                            </div>
+
+                        </div>
+                    </div>
+                @empty
+                    <div class="col-span-full py-20 text-center">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-100 mb-4">
+                            <svg class="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" /></svg>
+                        </div>
+                        <h3 class="text-lg font-bold text-[#171717]">Data Tidak Ditemukan</h3>
+                        <p class="text-slate-500 text-sm mt-1">Coba sesuaikan filter atau kata kunci pencarian Anda.</p>
+                        <a href="{{ route('admin.aset.index') }}" class="inline-block mt-4 text-[#fd2800] text-sm font-bold hover:underline">Reset Filter</a>
+                    </div>
+                @endforelse
             </div>
 
         </div>
     </div>
 
-    {{-- ========================================== --}}
-    {{-- SWEETALERT2 INTEGRATION --}}
-    {{-- ========================================== --}}
+    {{-- SCRIPTS --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // 1. Logic Tombol Hapus (Dialog Konfirmasi)
-        const deleteForms = document.querySelectorAll('.form-delete');
-        
-        deleteForms.forEach(form => {
+        document.querySelectorAll('.form-delete').forEach(form => {
             form.addEventListener('submit', function (e) {
                 e.preventDefault();
-
                 Swal.fire({
                     title: 'Hapus Aset?',
-                    text: "Data tidak dapat dikembalikan!",
+                    text: "Data tidak bisa dikembalikan.",
                     icon: 'warning',
                     iconColor: '#fd2800',
-                    background: '#ffffff',
-                    color: '#171717',
+                    width: '320px',
                     showCancelButton: true,
-                    confirmButtonText: 'Ya, Hapus',
+                    confirmButtonText: 'Hapus',
                     cancelButtonText: 'Batal',
+                    confirmButtonColor: '#fd2800',
+                    cancelButtonColor: '#171717',
                     reverseButtons: true,
-                    width: '400px',
-                    
                     customClass: {
-                        popup: 'rounded-2xl shadow-xl border border-slate-100 font-sans',
-                        title: 'text-lg font-bold text-[#171717]',
-                        htmlContainer: 'text-sm text-slate-500',
-                        confirmButton: 'bg-[#fd2800] text-white px-4 py-2 rounded-xl text-sm font-bold shadow-lg hover:bg-[#171717] transition-all focus:ring-0 border-0',
-                        cancelButton: 'bg-white text-slate-600 px-4 py-2 rounded-xl text-sm font-bold border border-slate-200 hover:bg-slate-50 transition-all focus:ring-0 mr-3'
+                        popup: 'rounded-xl font-sans',
+                        title: 'text-lg font-bold',
+                        htmlContainer: 'text-xs text-slate-500',
+                        confirmButton: 'rounded-lg px-4 py-2 text-xs font-bold shadow-md border-0',
+                        cancelButton: 'rounded-lg px-4 py-2 text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50',
+                        actions: 'gap-2'
                     },
                     buttonsStyling: false
                 }).then((result) => {
-                    if (result.isConfirmed) {
-                        form.submit();
-                    }
+                    if (result.isConfirmed) form.submit();
                 });
             });
         });
 
-        // 2. Logic Notifikasi Sukses (Compact Toast)
         @if(session('success'))
-        Swal.fire({
-            icon: 'success',
-            title: 'Berhasil',
-            text: '{{ session('success') }}',
-            iconColor: '#fd2800',
-            background: '#ffffff',
-            color: '#171717',
-            width: 380,
-            showConfirmButton: false,
-            timer: 2200,
-            timerProgressBar: true,
-            customClass: {
-                popup: 'rounded-2xl shadow-xl border border-slate-100 font-sans',
-                title: 'text-lg font-bold text-[#171717]',
-                htmlContainer: 'text-sm text-slate-500'
-            }
-        });
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil',
+                text: '{{ session('success') }}',
+                showConfirmButton: false,
+                timer: 1500,
+                width: '300px',
+                iconColor: '#fd2800',
+                customClass: { popup: 'rounded-xl font-sans', title: 'text-base font-bold', htmlContainer: 'text-xs' }
+            });
         @endif
-
-</script>
+    </script>
 </x-app-layout>

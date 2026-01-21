@@ -7,13 +7,51 @@ use App\Models\Aset;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
-
 class AsetController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $aset = Aset::latest()->get();
-        return view('admin.aset.index', compact('aset'));
+        // 1. Inisialisasi Query
+        $query = Aset::query();
+
+        // 2. Filter Pencarian (Search)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('nama_aset', 'LIKE', "%$search%")
+                  ->orWhere('kode_aset', 'LIKE', "%$search%");
+            });
+        }
+
+        // 3. Filter Kategori
+        if ($request->filled('kategori')) {
+            $query->where('kategori_aset', $request->kategori);
+        }
+
+        // 4. Filter Status
+        if ($request->filled('status')) {
+            $query->where('status_aset', $request->status);
+        }
+
+        // 5. Filter Kondisi
+        if ($request->filled('kondisi')) {
+            $query->where('kondisi_aset', $request->kondisi);
+        }
+
+        // 6. Ambil SEMUA data (Tanpa Pagination sesuai request)
+        $aset = $query->latest()->get();
+
+        // 7. Data untuk Dropdown Filter Kategori (Mengambil unik dari database)
+        $kategoriList = Aset::select('kategori_aset')->distinct()->pluck('kategori_aset');
+
+        // 8. Hitung Statistik untuk Header Dashboard
+        $stats = [
+            'total'     => Aset::count(),
+            'tersedia'  => Aset::where('status_aset', 'tersedia')->count(),
+            'rusak'     => Aset::where('kondisi_aset', 'rusak')->count(),
+        ];
+
+        return view('admin.aset.index', compact('aset', 'stats', 'kategoriList'));
     }
 
     public function create()
@@ -22,30 +60,37 @@ class AsetController extends Controller
     }
 
     public function store(Request $request)
-{
-        // Validasi
+    {
+        // Gabungkan kode aset dulu untuk pengecekan unique manual atau validasi custom jika perlu
+        // Di sini kita validasi format suffix-nya saja
         $request->validate(
-        [
-            'kode_aset_suffix' => ['required', 'digits:4'],
-            'nama_aset'       => ['required'],
-            'kategori_aset' => ['required', Rule::in([
-                'Elektronik',
-                'Furniture',
-                'Kendaraan',
-                'Peralatan Kantor',
-                'Inventaris IT',
-            ])],
-            'kondisi_aset'    => ['required', 'in:baik,rusak'],
-            'status_aset'     => ['required', 'in:tersedia,digunakan,rusak'],
-        ],
-        [
-            'kode_aset_suffix.required' => 'Kode aset wajib diisi.',
-            'kode_aset_suffix.digits'   => 'Kode aset harus tepat 4 angka.',
-        ]
-    );
+            [
+                'kode_aset_suffix' => ['required', 'digits:4'],
+                'nama_aset'       => ['required'],
+                'kategori_aset'   => ['required', Rule::in([
+                    'Elektronik',
+                    'Furniture',
+                    'Kendaraan',
+                    'Peralatan Kantor',
+                    'Inventaris IT',
+                ])],
+                'kondisi_aset'    => ['required', 'in:baik,rusak'],
+                'status_aset'     => ['required', 'in:tersedia,digunakan,rusak'],
+            ],
+            [
+                'kode_aset_suffix.required' => '4 digit kode aset wajib diisi.',
+                'kode_aset_suffix.digits'   => 'Kode harus tepat 4 angka.',
+            ]
+        );
 
-        // Gabungkan kode aset
-        $kodeAset = 'AST-2026-' . $request->kode_aset_suffix;
+        // Generate Kode Aset Dinamis (Format: AST-TAHUN-XXXX)
+        $tahun = date('Y');
+        $kodeAset = "AST-{$tahun}-" . $request->kode_aset_suffix;
+
+        // Cek manual unique agar lebih akurat (opsional, untuk mencegah duplikat full code)
+        if(Aset::where('kode_aset', $kodeAset)->exists()){
+            return back()->withErrors(['kode_aset_suffix' => 'Kode aset ini sudah terdaftar tahun ini.'])->withInput();
+        }
 
         // Simpan ke database
         Aset::create([
@@ -54,13 +99,12 @@ class AsetController extends Controller
             'kategori_aset' => $request->kategori_aset,
             'kondisi_aset'  => $request->kondisi_aset,
             'status_aset'   => $request->status_aset,
-    ]);
+        ]);
 
-    return redirect()
-        ->route('admin.aset.index')
-        ->with('success', 'Aset berhasil ditambahkan');
-}
-
+        return redirect()
+            ->route('admin.aset.index')
+            ->with('success', 'Aset berhasil ditambahkan');
+    }
 
     public function edit(Aset $aset)
     {
@@ -68,23 +112,24 @@ class AsetController extends Controller
     }
 
     public function update(Request $request, Aset $aset)
-{
+    {
         // Validasi
         $request->validate([
-            'kode_aset_suffix' => ['required', 'digits_between:1,4'],
+            'kode_aset_suffix' => ['required', 'digits:4'],
             'nama_aset'       => ['required'],
             'kategori_aset'   => ['required'],
             'kondisi_aset'    => ['required', 'in:baik,rusak'],
             'status_aset'     => ['required', 'in:tersedia,digunakan,rusak'],
         ]);
 
-        // Gabungkan ulang kode aset
-        $kodeAset = 'AST-2026-' . str_pad(
-            $request->kode_aset_suffix,
-            4,
-            '0',
-            STR_PAD_LEFT
-        );
+        // Generate ulang kode aset (jika suffix berubah)
+        $tahun = date('Y'); 
+        $kodeAset = "AST-{$tahun}-" . $request->kode_aset_suffix;
+
+        // Cek unique manual (kecuali punya diri sendiri)
+        if(Aset::where('kode_aset', $kodeAset)->where('id_aset', '!=', $aset->id_aset)->exists()){
+             return back()->withErrors(['kode_aset_suffix' => 'Kode aset ini sudah digunakan aset lain.'])->withInput();
+        }
 
         // Update database
         $aset->update([
@@ -93,13 +138,12 @@ class AsetController extends Controller
             'kategori_aset' => $request->kategori_aset,
             'kondisi_aset'  => $request->kondisi_aset,
             'status_aset'   => $request->status_aset,
-    ]);
+        ]);
 
-    return redirect()
-        ->route('admin.aset.index')
-        ->with('success', 'Aset berhasil diperbarui');
-}
-
+        return redirect()
+            ->route('admin.aset.index')
+            ->with('success', 'Aset berhasil diperbarui');
+    }
 
     public function destroy(Aset $aset)
     {
