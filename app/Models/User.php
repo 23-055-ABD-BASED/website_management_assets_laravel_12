@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Models\Pegawai; // 🔥 WAJIB
+use App\Models\Pegawai;
 
 class User extends Authenticatable
 {
@@ -19,14 +19,6 @@ class User extends Authenticatable
         'password',
         'role',
     ];
-
-    /**
-     * Kolom untuk autentikasi (override default 'email')
-     */
-    // public function getAuthIdentifierName()
-    // {
-    //     return 'username';
-    // }
 
     /**
      * The attributes that should be hidden for serialization.
@@ -47,15 +39,32 @@ class User extends Authenticatable
     }
 
     /**
-     * Relasi ke pegawai
+     * ================================
+     * RELASI KE PEGAWAI
+     * ================================
      */
-   public function pegawai()
-{
-    return $this->hasOne(
-        Pegawai::class,
-        'id_pengguna', // FK di tabel pegawai
-        'id'           // PK di tabel users
-    );
-}
+    public function pegawai()
+    {
+        return $this->hasOne(
+            Pegawai::class,
+            'id_pengguna', // FK di tabel pegawai
+            'id'           // PK di tabel users
+        );
+    }
 
+    /**
+     * ================================
+     * CEK APAKAH PEGAWAI AKTIF
+     * ================================
+     */
+    public function isPegawaiAktif(): bool
+    {
+        // Jika user tidak punya data pegawai → dianggap TIDAK AKTIF
+        if (!$this->pegawai) {
+            return false;
+        }
+
+        // Cek status pegawai
+        return $this->pegawai->status_pegawai === 'aktif';
+    }
 }

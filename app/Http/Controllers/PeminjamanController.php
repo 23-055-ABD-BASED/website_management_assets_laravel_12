@@ -16,35 +16,50 @@ class PeminjamanController extends Controller
 
     // 1. Simpan Pengajuan
     public function store(Request $request)
-    {
-        $request->validate([
-            'id_aset' => 'required|exists:aset,id_aset',
-            'tanggal_pinjam' => 'required|date',
-            'tanggal_kembali' => 'required|date|after_or_equal:tanggal_pinjam',
-            'alasan' => 'required|string',
-        ]);
+{
+    $request->validate([
+        'id_aset' => 'required|exists:aset,id_aset',
+        'tanggal_pinjam' => 'required|date',
+        'tanggal_kembali' => 'required|date|after_or_equal:tanggal_pinjam',
+        'alasan' => 'required|string',
+    ]);
 
-        // Pastikan aset tersedia sebelum mengajukan
-        $aset = Aset::find($request->id_aset);
-        if ($aset->status_aset != 'tersedia') {
-            return back()->with('error', 'Barang sedang tidak tersedia.');
-        }
-
-        // Simpan ke database dengan status 'pending'
-        // Asumsi: Anda mendapatkan id_pegawai dari relasi User yang login
-        $pegawai = Auth::user()->pegawai; // Pastikan relasi user->pegawai sudah ada
-
-        Peminjaman::create([
-            'id_pegawai' => $pegawai->id_pegawai,
-            'id_aset' => $request->id_aset,
-            'tanggal_pinjam' => $request->tanggal_pinjam,
-            'tanggal_kembali' => $request->tanggal_kembali,
-            'alasan' => $request->alasan,
-            'status' => 'pending',
-        ]);
-
-        return redirect()->route('peminjaman.index')->with('success', 'Pengajuan berhasil dikirim, menunggu persetujuan Admin.');
+    // Pastikan aset tersedia
+    $aset = Aset::find($request->id_aset);
+    if ($aset->status_aset != 'tersedia') {
+        return back()->with('error', 'Barang sedang tidak tersedia.');
     }
+
+    $pegawai = Auth::user()->pegawai;
+
+    // 🔴 CEK DUPLIKAT PENGAJUAN (PENDING)
+    $sudahPending = Peminjaman::where('id_pegawai', $pegawai->id_pegawai)
+        ->where('id_aset', $request->id_aset)
+        ->where('status', 'pending')
+        ->exists();
+
+    if ($sudahPending) {
+        return redirect()->back()->with(
+            'peminjaman_pending',
+            'Aset ini sudah Anda ajukan dan masih menunggu persetujuan admin.'
+        );
+    }
+
+    // ✅ SIMPAN JIKA AMAN
+    Peminjaman::create([
+        'id_pegawai' => $pegawai->id_pegawai,
+        'id_aset' => $request->id_aset,
+        'tanggal_pinjam' => $request->tanggal_pinjam,
+        'tanggal_kembali' => $request->tanggal_kembali,
+        'alasan' => $request->alasan,
+        'status' => 'pending',
+    ]);
+
+    return redirect()
+        ->route('peminjaman.index')
+        ->with('success', 'Pengajuan berhasil dikirim, menunggu persetujuan Admin.');
+}
+
 
     // --- FITUR UNTUK ADMIN ---
 

@@ -18,6 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         
         $middleware->alias([
             'pegawai.exists' => \App\Http\Middleware\EnsurePegawaiExists::class,
+            'pegawai.aktif'  => \App\Http\Middleware\CheckPegawaiAktif::class,
             'admin' => \App\Http\Middleware\IsAdmin::class,
         ]);
     })

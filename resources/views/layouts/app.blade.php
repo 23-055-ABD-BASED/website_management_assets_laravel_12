@@ -92,5 +92,40 @@
         });
     </script>
     @endif
+
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    {{-- SWEETALERT: PEGAWAI NONAKTIF --}}
+    @if(session('pegawai_nonaktif'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Akses Ditolak',
+                text: @json(session('pegawai_nonaktif')),
+                confirmButtonText: 'Mengerti',
+                confirmButtonColor: '#fd2800',
+                allowOutsideClick: false,
+            });
+        });
+    </script>
+    @endif
+
+@if($errors->has('kode_aset'))
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    Swal.fire({
+        icon: 'error',
+        title: 'Kode Aset Duplikat',
+        text: @json($errors->first('kode_aset')),
+        confirmButtonText: 'Mengerti',
+        confirmButtonColor: '#dc2626'
+    });
+});
+</script>
+@endif
+
+
 </body>
 </html>

@@ -23,43 +23,43 @@ class AsetController extends Controller
 
     public function store(Request $request)
 {
-        // Validasi
-        $request->validate(
+    // Validasi awal
+    $request->validate(
         [
             'kode_aset_suffix' => ['required', 'digits:4'],
             'nama_aset'       => ['required'],
-            'kategori_aset' => ['required', Rule::in([
-                'Elektronik',
-                'Furniture',
-                'Kendaraan',
-                'Peralatan Kantor',
-                'Inventaris IT',
-            ])],
+            'kategori_aset'   => ['required'],
             'kondisi_aset'    => ['required', 'in:baik,rusak'],
             'status_aset'     => ['required', 'in:tersedia,digunakan,rusak'],
-        ],
-        [
-            'kode_aset_suffix.required' => 'Kode aset wajib diisi.',
-            'kode_aset_suffix.digits'   => 'Kode aset harus tepat 4 angka.',
         ]
     );
 
-        // Gabungkan kode aset
-        $kodeAset = 'AST-2026-' . $request->kode_aset_suffix;
+    // Gabungkan kode aset
+    $kodeAset = 'AST-2026-' . $request->kode_aset_suffix;
 
-        // Simpan ke database
-        Aset::create([
-            'kode_aset'     => $kodeAset,
-            'nama_aset'     => $request->nama_aset,
-            'kategori_aset' => $request->kategori_aset,
-            'kondisi_aset'  => $request->kondisi_aset,
-            'status_aset'   => $request->status_aset,
+    // 🔴 CEK DUPLIKAT
+    if (Aset::where('kode_aset', $kodeAset)->exists()) {
+        return back()
+            ->withErrors([
+                'kode_aset' => 'Kode aset sudah digunakan, silakan gunakan kode lain.'
+            ])
+            ->withInput();
+    }
+
+    // Simpan ke database
+    Aset::create([
+        'kode_aset'     => $kodeAset,
+        'nama_aset'     => $request->nama_aset,
+        'kategori_aset' => $request->kategori_aset,
+        'kondisi_aset'  => $request->kondisi_aset,
+        'status_aset'   => $request->status_aset,
     ]);
 
     return redirect()
         ->route('admin.aset.index')
         ->with('success', 'Aset berhasil ditambahkan');
 }
+
 
 
     public function edit(Aset $aset)
@@ -85,6 +85,20 @@ class AsetController extends Controller
             '0',
             STR_PAD_LEFT
         );
+
+        $kodeSudahAda = Aset::where('kode_aset', $kodeAset)
+            ->where('id_aset', '!=', $aset->id_aset)
+            ->exists();
+
+        if ($kodeSudahAda) {
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors([
+                    'kode_aset' => 'Kode aset sudah digunakan oleh aset lain.',
+                ]);
+        }
+
 
         // Update database
         $aset->update([

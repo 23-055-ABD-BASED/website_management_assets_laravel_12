@@ -79,8 +79,15 @@ Route::middleware('auth')->group(function () {
     // ==========================================
     //  FITUR PEMINJAMAN (USER / PEGAWAI)
     // ==========================================
-    Route::post('/peminjaman/ajukan', [PeminjamanController::class, 'store'])->name('peminjaman.store');
-    Route::get('/peminjaman/riwayat', [PeminjamanController::class, 'indexUser'])->name('peminjaman.index');
+    Route::middleware('pegawai.aktif')->group(function () {
+
+        Route::post('/peminjaman/ajukan', [PeminjamanController::class, 'store'])
+            ->name('peminjaman.store');
+
+        Route::get('/peminjaman/riwayat', [PeminjamanController::class, 'indexUser'])
+            ->name('peminjaman.index');
+
+    });
 
 
     // --- 4. GROUP KHUSUS ADMIN ---
