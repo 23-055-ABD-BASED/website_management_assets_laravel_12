@@ -261,27 +261,44 @@
                                                 </td>
                                                <td class="px-6 py-4 whitespace-nowrap">
                                                     @php
-                                                        // FIX: Gunakan startOfDay() agar perhitungan tidak terpengaruh jam saat ini
                                                         $deadline = \Carbon\Carbon::parse($item->tanggal_kembali)->startOfDay();
                                                         $now = now()->startOfDay();
-                                                        
                                                         $sisaHari = $now->diffInDays($deadline, false);
                                                         $isLate = $sisaHari < 0;
                                                     @endphp
 
-                                                    @if($isLate)
-                                                        <div class="flex items-center gap-2 text-[#fd2800]">
-                                                            <span class="relative flex h-2.5 w-2.5">
-                                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                                                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#fd2800]"></span>
+                                                    <div class="flex flex-col gap-1">
+                                                        {{-- STATUS DEADLINE --}}
+                                                        @if($isLate)
+                                                            <div class="flex items-center gap-2 text-[#fd2800]">
+                                                                <span class="relative flex h-2.5 w-2.5">
+                                                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                                                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#fd2800]"></span>
+                                                                </span>
+                                                                <span class="text-xs font-bold font-heading">
+                                                                    Telat {{ abs($sisaHari) }} Hari
+                                                                </span>
+                                                            </div>
+                                                        @elseif($sisaHari === 0)
+                                                            <span class="inline-flex w-fit items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">
+                                                                Deadline Hari Ini
                                                             </span>
-                                                            <span class="text-xs font-bold font-heading">Telat {{ abs(intval($sisaHari)) }} Hari</span>
-                                                        </div>
-                                                    @elseif($sisaHari == 0)
-                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">Deadline Hari Ini</span>
-                                                    @else
-                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#ededed] text-[#444444]">{{ intval($sisaHari) }} Hari Lagi</span>
-                                                    @endif
+                                                        @else
+                                                            <span class="inline-flex w-fit items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#ededed] text-[#444444]">
+                                                                {{ $sisaHari }} Hari Lagi
+                                                            </span>
+                                                        @endif
+
+                                                        {{-- PENANDA ASET DIGUNAKAN JANGKA PANJANG --}}
+                                                        @if($item->digunakan_terlalu_lama)
+                                                            <span 
+                                                                class="inline-flex w-fit items-center gap-1 px-2 py-0.5 rounded-md bg-red-50 text-red-600 text-[10px] font-bold font-heading"
+                                                                title="Aset ini dipinjam dalam durasi jangka panjang"
+                                                            >
+                                                                ⏱ Digunakan jangka panjang
+                                                            </span>
+                                                        @endif
+                                                    </div>
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                     <button type="button" 

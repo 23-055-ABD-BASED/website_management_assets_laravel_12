@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Peminjaman extends Model
 {
@@ -20,4 +21,25 @@ class Peminjaman extends Model
     {
         return $this->belongsTo(Aset::class, 'id_aset', 'id_aset');
     }
+
+    // Fitur penanda aset digunakan dalam jangka panjang
+    public function getDigunakanTerlaluLamaAttribute()
+{
+    $batasHari = 30;
+
+    if ($this->status !== 'disetujui') {
+        return false;
+    }
+
+    if (!$this->tanggal_pinjam || !$this->tanggal_kembali) {
+        return false;
+    }
+
+    // HITUNG TOTAL DURASI PEMINJAMAN
+    $durasi = Carbon::parse($this->tanggal_pinjam)
+        ->diffInDays(Carbon::parse($this->tanggal_kembali));
+
+    return $durasi >= $batasHari;
+}
+
 }
