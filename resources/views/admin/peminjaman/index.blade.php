@@ -6,10 +6,9 @@
 
     <style>
         .font-heading { font-family: 'Poppins', sans-serif; }
-        .font-body { font-family: 'Helvetica', 'Arial', sans-serif; }
+        .font-body { font-family: 'Poppins', sans-serif; }
         [x-cloak] { display: none !important; }
         
-        /* Custom Scrollbar */
         .custom-scrollbar::-webkit-scrollbar { height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 4px; }
