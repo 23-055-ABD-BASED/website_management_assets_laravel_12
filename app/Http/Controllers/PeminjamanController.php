@@ -228,7 +228,7 @@ public function returnAsset(Request $request, $id)
         ->translatedFormat('F');
 
     $data = Peminjaman::with(['pegawai', 'aset'])
-        ->where('status', 'kembali')
+        ->whereIn('status', ['kembali', 'ditolak'])
         ->whereMonth('updated_at', $bulan)
         ->whereYear('updated_at', $tahun)
         ->orderBy('updated_at', 'asc')
