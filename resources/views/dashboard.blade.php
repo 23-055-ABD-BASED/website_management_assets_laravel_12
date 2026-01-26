@@ -288,5 +288,22 @@
                 confirmButtonColor: '#f59e0b'
             });
         @endif
+
+        @if ($errors->has('peminjaman'))
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Tidak Bisa Mengajukan',
+                text: '{{ $errors->first('peminjaman') }}',
+                confirmButtonText: 'Mengerti',
+                confirmButtonColor: '#fd2800',
+                allowOutsideClick: false
+            });
+        });
+        </script>
+        @endif
+
     });
 </script>

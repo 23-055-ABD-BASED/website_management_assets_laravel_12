@@ -24,13 +24,19 @@ class PeminjamanController extends Controller
         'alasan' => 'required|string',
     ]);
 
-    // Pastikan aset tersedia
-    $aset = Aset::find($request->id_aset);
-    if ($aset->status_aset != 'tersedia') {
-        return back()->with('error', 'Barang sedang tidak tersedia.');
-    }
+$pegawai = Auth::user()->pegawai;
 
-    $pegawai = Auth::user()->pegawai;
+// CEK: aset ini sudah diajukan & masih pending oleh pegawai yang sama
+$cekPending = Peminjaman::where('id_pegawai', $pegawai->id_pegawai)
+    ->where('id_aset', $request->id_aset)
+    ->where('status', 'pending')
+    ->exists();
+
+if ($cekPending) {
+    return back()->withErrors([
+        'peminjaman' => 'Aset ini sudah Anda ajukan dan masih menunggu persetujuan admin.'
+    ]);
+}
 
     // 🔴 CEK DUPLIKAT PENGAJUAN (PENDING)
     $sudahPending = Peminjaman::where('id_pegawai', $pegawai->id_pegawai)
