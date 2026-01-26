@@ -25,7 +25,6 @@ class User extends Authenticatable
      */
     protected $hidden = [
         'password',
-        'remember_token',
     ];
 
     /**
@@ -47,8 +46,8 @@ class User extends Authenticatable
     {
         return $this->hasOne(
             Pegawai::class,
-            'id_pengguna', // FK di tabel pegawai
-            'id'           // PK di tabel users
+            'id_pengguna', 
+            'id'
         );
     }
 

@@ -5,7 +5,6 @@
     <style>
         .font-heading { font-family: 'Poppins', sans-serif; }
         .font-mono { font-family: 'JetBrains Mono', monospace; }
-        /* Hide scrollbar for stats container */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
@@ -166,17 +165,44 @@
 
                             {{-- Actions --}}
                             <div class="flex gap-2">
-                                <a href="{{ route('admin.aset.edit', $a) }}" class="flex-1 py-2 rounded-lg bg-slate-50 text-slate-600 text-xs font-bold text-center border border-slate-200 hover:bg-white hover:border-slate-300 hover:text-[#171717] transition-all">
-                                    Edit
-                                </a>
-                                <form method="POST" action="{{ route('admin.aset.destroy', $a) }}" class="form-delete">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="px-3 py-2 rounded-lg bg-white text-slate-400 border border-slate-200 hover:bg-red-50 hover:text-[#fd2800] hover:border-red-100 transition-all">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                @if($a->status_aset === 'digunakan')
+                                    {{-- EDIT DISABLED --}}
+                                    <button type="button"
+                                        class="flex-1 py-2 rounded-lg bg-slate-100 text-slate-400 text-xs font-bold text-center border border-slate-200 cursor-not-allowed"
+                                        title="Aset sedang digunakan">
+                                        Digunakan
                                     </button>
-                                </form>
-                            </div>
 
+                                    {{-- DELETE DISABLED --}}
+                                    <button type="button"
+                                        class="px-3 py-2 rounded-lg bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed"
+                                        title="Aset sedang digunakan">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                @else
+                                    {{-- EDIT --}}
+                                    <a href="{{ route('admin.aset.edit', $a) }}"
+                                    class="flex-1 py-2 rounded-lg bg-slate-50 text-slate-600 text-xs font-bold text-center border border-slate-200 hover:bg-white hover:border-slate-300 hover:text-[#171717] transition-all">
+                                        Edit
+                                    </a>
+
+                                    {{-- DELETE --}}
+                                    <form method="POST" action="{{ route('admin.aset.destroy', $a) }}" class="form-delete">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit"
+                                            class="px-3 py-2 rounded-lg bg-white text-slate-400 border border-slate-200 hover:bg-red-50 hover:text-[#fd2800] hover:border-red-100 transition-all">
+                                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
                         </div>
                     </div>
                 @empty
@@ -212,6 +238,7 @@
                     confirmButtonColor: '#fd2800',
                     cancelButtonColor: '#171717',
                     reverseButtons: true,
+                    buttonsStyling: false,
                     customClass: {
                         popup: 'rounded-xl font-sans',
                         title: 'text-lg font-bold',
@@ -219,15 +246,14 @@
                         confirmButton: 'rounded-lg px-4 py-2 text-xs font-bold shadow-md border-0',
                         cancelButton: 'rounded-lg px-4 py-2 text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50',
                         actions: 'gap-2'
-                    },
-                    buttonsStyling: false
+                    }
                 }).then((result) => {
                     if (result.isConfirmed) form.submit();
                 });
             });
-        });
+});
 
-<<<<<<< HEAD
+
         // 2. Logic Notifikasi Sukses (Compact Toast)
 @if(session('success'))
 Swal.fire({
@@ -248,21 +274,27 @@ Swal.fire({
     }
 });
 @endif
+@if(session('error'))
+<script>
+Swal.fire({
+    icon: 'error',
+    title: 'Aksi Ditolak',
+    text: "{!! session('error') !!}",
+    iconColor: '#fd2800',
+    background: '#ffffff',
+    color: '#171717',
+    width: 380,
+    confirmButtonText: 'Mengerti',
+    confirmButtonColor: '#fd2800',
+    customClass: {
+        popup: 'rounded-2xl shadow-xl border border-slate-100 font-sans',
+        title: 'text-lg font-bold',
+        htmlContainer: 'text-sm text-slate-500',
+        confirmButton: 'rounded-lg px-4 py-2 text-xs font-bold border-0'
+    }
+});
+</script>
+@endif
 
 </script>
-=======
-        @if(session('success'))
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil',
-                text: '{{ session('success') }}',
-                showConfirmButton: false,
-                timer: 1500,
-                width: '300px',
-                iconColor: '#fd2800',
-                customClass: { popup: 'rounded-xl font-sans', title: 'text-base font-bold', htmlContainer: 'text-xs' }
-            });
-        @endif
-    </script>
->>>>>>> 4ae2455f9a9b2b83b718ff8f066d69f54f68415b
 </x-app-layout>
