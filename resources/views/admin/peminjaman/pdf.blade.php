@@ -47,6 +47,7 @@
                 <th>Tanggal Selesai</th>
                 <th>Peminjam</th>
                 <th>Aset</th>
+                <th>Status</th>
                 <th>Kondisi</th>
             </tr>
         </thead>
@@ -57,6 +58,7 @@
                     <td>{{ $row->updated_at->format('d-m-Y') }}</td>
                     <td>{{ $row->pegawai->nama_pegawai }}</td>
                     <td>{{ $row->aset->nama_aset }}</td>
+                    <td>{{ ucfirst($row->status) }}</td>
                     <td>{{ ucfirst($row->kondisi_pengembalian) }}</td>
                 </tr>
             @endforeach
