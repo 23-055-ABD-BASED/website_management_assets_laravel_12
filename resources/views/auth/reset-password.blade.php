@@ -1,39 +1,133 @@
 <x-guest-layout>
-    <form method="POST" action="{{ route('password.store') }}">
-        @csrf
+    <div class="min-h-screen flex items-center justify-center bg-[#ffffff]">
 
-        <!-- Password Reset Token -->
-        <input type="hidden" name="token" value="{{ $request->route('token') }}">
+        <!-- ================= MAIN CARD ================= -->
+        <div class="w-full max-w-4xl mx-4 lg:mx-0 bg-white rounded-2xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-2">
 
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email', $request->email)" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+            <!-- ========== LEFT SIDE (IMAGE) ========== -->
+            <div class="relative hidden lg:block overflow-hidden bg-[#171717]">
+                <div
+                    class="absolute inset-0 bg-cover bg-center"
+                    style="background-image: url('{{ asset('images/regone.jpg') }}');"
+                ></div>
+            </div>
+
+            <!-- ========== RIGHT SIDE (FORM) ========== -->
+            <div class="flex items-center justify-center p-6 sm:p-8 lg:p-10">
+                <div class="w-full max-w-md">
+
+                    <h2 class="text-xl sm:text-2xl font-bold text-[#171717]">
+                        Reset Password
+                    </h2>
+
+                    <p class="text-sm text-[#444444] mt-1">
+                        Silakan masukkan password baru untuk akun kamu.
+                    </p>
+
+                    <form method="POST" action="{{ route('password.store') }}" class="mt-6 space-y-5">
+                        @csrf
+
+                        <!-- TOKEN -->
+                        <input type="hidden" name="token" value="{{ $request->route('token') }}">
+
+                        <!-- EMAIL -->
+                        <div>
+                            <x-input-label for="email" value="Email" class="text-[#444444]" />
+                            <x-text-input
+                                id="email"
+                                name="email"
+                                type="email"
+                                :value="old('email', $request->email)"
+                                required
+                                autofocus
+                                class="mt-1 w-full rounded-lg border-gray-300 focus:border-[#fd2800] focus:ring-[#fd2800]"
+                            />
+                            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+                        </div>
+
+                        <!-- PASSWORD -->
+                        <div>
+                            <x-input-label for="password" value="New Password" class="text-[#444444]" />
+
+                            <div class="relative">
+                                <x-text-input
+                                    id="reset_password"
+                                    name="password"
+                                    type="password"
+                                    required
+                                    class="mt-1 w-full rounded-lg border-gray-300 focus:border-[#fd2800] focus:ring-[#fd2800] pr-10"
+                                />
+
+                                <!-- ICON MATA -->
+                                <button
+                                    type="button"
+                                    onclick="togglePassword('reset_password', this)"
+                                    class="absolute inset-y-0 right-3 flex items-center"
+                                >
+                                    <img src="{{ asset('images/visible.png') }}" class="eye-open w-5 h-5">
+                                    <img src="{{ asset('images/hide.png') }}" class="eye-closed w-5 h-5 hidden">
+                                </button>
+                            </div>
+
+                            <x-input-error :messages="$errors->get('password')" class="mt-2" />
+                        </div>
+
+                        <!-- CONFIRM PASSWORD -->
+                        <div>
+                            <x-input-label for="password_confirmation" value="Confirm Password" class="text-[#444444]" />
+
+                            <div class="relative">
+                                <x-text-input
+                                    id="reset_password_confirmation"
+                                    name="password_confirmation"
+                                    type="password"
+                                    required
+                                    class="mt-1 w-full rounded-lg border-gray-300 focus:border-[#fd2800] focus:ring-[#fd2800] pr-10"
+                                />
+                            </div>
+
+                            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+                        </div>
+
+                        <!-- SUBMIT -->
+                        <button
+                            type="submit"
+                            class="w-full py-3 rounded-lg bg-[#fd2800] text-white font-semibold hover:opacity-90 transition"
+                        >
+                            Reset Password
+                        </button>
+
+                        <!-- BACK TO LOGIN -->
+                        <div class="text-center text-sm text-[#444444]">
+                            <a href="{{ route('login') }}" class="text-[#fd2800] hover:underline">
+                                Kembali ke Login
+                            </a>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
         </div>
-
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Password')" />
-            <x-text-input id="password" class="block mt-1 w-full" type="password" name="password" required autocomplete="new-password" />
-            <x-input-error :messages="$errors->get('password')" class="mt-2" />
-        </div>
-
-        <!-- Confirm Password -->
-        <div class="mt-4">
-            <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
-
-            <x-text-input id="password_confirmation" class="block mt-1 w-full"
-                                type="password"
-                                name="password_confirmation" required autocomplete="new-password" />
-
-            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Reset Password') }}
-            </x-primary-button>
-        </div>
-    </form>
+    </div>
 </x-guest-layout>
+
+<!-- TOGGLE PASSWORD -->
+<script>
+function togglePassword(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const eyeOpen = btn.querySelector('.eye-open');
+    const eyeClosed = btn.querySelector('.eye-closed');
+
+    if (input.type === "password") {
+        input.type = "text";
+        eyeOpen.classList.add("hidden");
+        eyeClosed.classList.remove("hidden");
+    } else {
+        input.type = "password";
+        eyeOpen.classList.remove("hidden");
+        eyeClosed.classList.add("hidden");
+    }
+}
+</script>
