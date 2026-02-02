@@ -55,10 +55,14 @@ class DashboardStatistikController extends Controller
 
         $topPeminjam = Peminjaman::select('id_pegawai')
             ->selectRaw('COUNT(*) as total')
+            ->whereYear('tanggal_pinjam', now()->year)
+            ->whereHas('pegawai', function ($q) {
+                $q->where('status_pegawai', 'aktif');
+            })
             ->groupBy('id_pegawai')
             ->with('pegawai')
             ->orderByDesc('total')
-            ->take(5)
+            ->limit(5)
             ->get();
 
         $peminjamanTrend = Peminjaman::selectRaw('YEAR(created_at) as tahun')
@@ -76,12 +80,14 @@ class DashboardStatistikController extends Controller
             'rusak'     => Aset::where('status_aset', 'rusak')->count(),
         ];
 
-        $rataDurasiPinjam = Peminjaman::whereNotNull('tanggal_kembali_real')
-            ->selectRaw('AVG(DATEDIFF(tanggal_kembali_real, tanggal_pinjam)) as rata')
-            ->value('rata') ?? 0;
+        $rataDurasiPinjam = round(
+            Peminjaman::whereNotNull('tanggal_kembali_real')
+                ->selectRaw('AVG(DATEDIFF(tanggal_kembali_real, tanggal_pinjam))')
+                ->value('AVG(DATEDIFF(tanggal_kembali_real, tanggal_pinjam))')
+        ) ?? 0;
 
-        $pegawaiAktif = Pegawai::whereHas('peminjaman')->count();
-        $pegawaiTidakAktif = Pegawai::count() - $pegawaiAktif;
+        $pegawaiAktif = Pegawai::where('status_pegawai', 'aktif')->count();
+        $pegawaiTidakAktif = Pegawai::where('status_pegawai', 'nonaktif')->count();
 
         $totalDisetujui = Peminjaman::where('status', 'disetujui')->count();
         $terlambat = Peminjaman::where('status', 'disetujui')
