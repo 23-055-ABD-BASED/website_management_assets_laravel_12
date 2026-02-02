@@ -234,70 +234,158 @@
                                 </table>
                             </div>
                         </div>
+                                            <div class="mt-8 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md border border-red-100 dark:border-red-900/30">
+    <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+            <div class="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg text-red-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <div>
+                <h3 class="text-lg font-bold text-gray-800 dark:text-white">Peminjaman Terlambat</h3>
+                <p class="text-sm text-gray-500">Daftar aset yang belum dikembalikan melewati batas waktu</p>
+            </div>
+        </div>
+        <span class="bg-red-100 text-red-700 text-xs font-bold px-3 py-1 rounded-full border border-red-200">
+            {{ $peminjamanTerlambat->count() }} Pelanggaran
+        </span>
+    </div>
+
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="text-gray-400 text-xs uppercase tracking-wider border-b dark:border-gray-700">
+                    <th class="pb-3 px-4 font-semibold">Pegawai</th>
+                    <th class="pb-3 px-4 font-semibold">Aset / Barang</th>
+                    <th class="pb-3 px-4 font-semibold">Batas Kembali</th>
+                    <th class="pb-3 px-4 font-semibold text-center">Status Keterlambatan</th>
+                </tr>
+            </thead>
+            <tbody class="text-gray-600 dark:text-gray-300">
+@forelse($peminjamanTerlambat as $item)
+<tr class="border-b dark:border-gray-700 hover:bg-red-50 dark:hover:bg-red-900/10 transition-colors text-white">
+    {{-- CEK NAMA PEGAWAI --}}
+<td class="py-4 px-4 font-medium text-white">
+    {{-- Kita panggil kolom nama_pegawai sesuai database kamu --}}
+    {{ $item->pegawai->nama_pegawai ?? 'Nama Tidak Terdeteksi' }}
+</td>
+    
+    {{-- CEK NAMA ASET --}}
+    <td class="py-4 px-4">
+        <div class="flex flex-col">
+            {{-- Kita coba panggil 'aset' (indonesia) karena di screenshot controller kamu ada AsetController --}}
+            <span class="font-medium text-white">{{ $item->aset->nama_aset ?? $item->asset->nama_aset ?? 'Barang Terhapus' }}</span>
+            <span class="text-xs text-gray-400">ID: {{ $item->aset->kode_aset ?? $item->asset->kode_aset ?? '-' }}</span>
+        </div>
+    </td>
+
+    <td class="py-4 px-4 text-red-500 font-semibold text-center">
+        {{ \Carbon\Carbon::parse($item->tanggal_kembali)->format('d M Y') }}
+    </td>
+
+    {{-- FIX ANGKA DESIMAL PANJANG --}}
+    <td class="py-4 px-4 text-center">
+        <span class="inline-flex items-center bg-red-600 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse">
+            Terlambat {{ number_format(\Carbon\Carbon::parse($item->tanggal_kembali)->diffInDays(now()), 0) }} Hari
+        </span>
+    </td>
+</tr>
+@empty
+...
+@endforelse
+            </tbody>
+        </table>    
+    </div>
+</div>
 
                     </div>
 
-                    {{-- RIGHT COLUMN: SIDEBAR --}}
-                    <div class="lg:col-span-1 space-y-6">
-                        
-                        {{-- Menu Card --}}
-                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-                            <h3 class="font-bold text-[#171717] mb-5 flex items-center gap-2 text-sm uppercase tracking-wide">
-                                <span class="w-1 h-5 bg-[#fd2800] rounded-full"></span>
-                                Navigasi Cepat
-                            </h3>
-                            <div class="space-y-3">
-                                <a href="{{ route('pegawai.index') }}" class="group flex items-center justify-between w-full px-4 py-3 bg-slate-50 hover:bg-[#171717] hover:text-white rounded-xl transition-all duration-200 border border-transparent hover:shadow-md">
-                                    <span class="flex items-center gap-3 font-medium text-sm">
-                                        <svg class="w-5 h-5 text-slate-400 group-hover:text-[#fd2800] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-                                        Kelola Database
-                                    </span>
-                                    <svg class="w-4 h-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                                </a>
 
-                                <button @click="showModal = true" class="group flex items-center justify-between w-full px-4 py-3 bg-slate-50 hover:bg-[#171717] hover:text-white rounded-xl transition-all duration-200 border border-transparent hover:shadow-md">
-                                    <span class="flex items-center gap-3 font-medium text-sm">
-                                        <svg class="w-5 h-5 text-slate-400 group-hover:text-[#fd2800] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
-                                        Input Pegawai
-                                    </span>
-                                    <svg class="w-4 h-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-                                </button>
-                            </div>
-                        </div>
 
-                        {{-- Server Status Widget (Terminal Style) --}}
-                        <div class="bg-[#171717] rounded-2xl shadow-lg p-6 text-white relative overflow-hidden ring-1 ring-white/10">
-                             <div class="absolute -top-12 -right-12 w-40 h-40 bg-[#fd2800] rounded-full blur-[80px] opacity-20"></div>
-                             
-                            <div class="flex items-center justify-between mb-6 relative z-10">
-                                <h3 class="font-bold text-xs uppercase tracking-widest text-slate-400 flex items-center gap-2">
-                                    <div class="w-2 h-2 bg-[#fd2800] rounded-full animate-pulse"></div>
-                                    System Status
-                                </h3>
-                            </div>
-                            
-                            <div class="space-y-4 relative z-10 font-mono text-sm">
-                                <div class="flex justify-between items-center pb-2 border-b border-white/10">
-                                    <span class="text-slate-400">Database</span>
-                                    <span class="text-green-400 font-bold">● ONLINE</span>
-                                </div>
-                                <div class="flex justify-between items-center pb-2 border-b border-white/10">
-                                    <span class="text-slate-400">Total Asset Value</span>
-                                    {{-- Contoh penggunaan statistik asset total jika ada --}}
-                                    <span class="text-white">{{ $stats['aset']['total'] }} Item</span>
-                                </div>
-                                <div>
-                                    <span class="text-slate-400 block mb-1">Server Load</span>
-                                    <div class="w-full bg-white/10 rounded-full h-1.5">
-                                        <div class="bg-[#fd2800] h-1.5 rounded-full" style="width: 100%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+{{-- RIGHT COLUMN: SIDEBAR --}}
+<div class="lg:col-span-1 space-y-6">
+    
+    {{-- 1. Navigasi Cepat (Kartu Putih) --}}
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+        <h3 class="font-bold text-[#171717] mb-5 flex items-center gap-2 text-sm uppercase tracking-wide">
+            <span class="w-1 h-5 bg-[#fd2800] rounded-full"></span>
+            Navigasi Cepat
+        </h3>
+        <div class="space-y-3">
+            <a href="{{ route('pegawai.index') }}" class="group flex items-center justify-between w-full px-4 py-3 bg-slate-50 hover:bg-[#171717] hover:text-white rounded-xl transition-all duration-200 border border-transparent hover:shadow-md">
+                <span class="flex items-center gap-3 font-medium text-sm text-slate-700 group-hover:text-white">
+                    <svg class="w-5 h-5 text-slate-400 group-hover:text-[#fd2800] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                    Kelola Database
+                </span>
+                <svg class="w-4 h-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+            </a>
+
+            <button @click="showModal = true" class="group flex items-center justify-between w-full px-4 py-3 bg-slate-50 hover:bg-[#171717] hover:text-white rounded-xl transition-all duration-200 border border-transparent hover:shadow-md">
+                <span class="flex items-center gap-3 font-medium text-sm text-slate-700 group-hover:text-white">
+                    <svg class="w-5 h-5 text-slate-400 group-hover:text-[#fd2800] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
+                    Input Pegawai
+                </span>
+                <svg class="w-4 h-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+            </button>
+        </div>
+    </div>
+
+    {{-- 2. System Status (Kartu Hitam - Berada di Tengah) --}}
+    <div class="bg-[#171717] rounded-2xl shadow-xl p-6 text-white relative overflow-hidden ring-1 ring-white/10">
+        <div class="absolute -top-12 -right-12 w-40 h-40 bg-[#fd2800] rounded-full blur-[80px] opacity-20"></div>
+        <div class="flex items-center justify-between mb-6 relative z-10">
+            <h3 class="font-bold text-xs uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                <div class="w-2 h-2 bg-[#fd2800] rounded-full animate-pulse"></div>
+                System Status
+            </h3>
+        </div>
+        
+        <div class="space-y-4 relative z-10 font-mono text-sm">
+            <div class="flex justify-between items-center pb-2 border-b border-white/10">
+                <span class="text-slate-400">Database</span>
+                <span class="text-green-400 font-bold">● ONLINE</span>
+            </div>
+            <div class="flex justify-between items-center pb-2 border-b border-white/10">
+                <span class="text-slate-400">Total Assets</span>
+                <span class="text-white font-bold">{{ $stats['aset']['total'] }} Item</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-slate-400 italic">Server Load</span>
+                <div class="w-20 bg-white/10 rounded-full h-1.5 overflow-hidden">
+                    <div class="bg-[#fd2800] h-full rounded-full animate-pulse" style="width: 42%"></div>
                 </div>
             </div>
         </div>
+    </div>
+
+    {{-- 3. Asset Inventory (Sekarang Jadi Kartu Putih di Paling Bawah) --}}
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
+        <h3 class="font-bold text-[#171717] mb-6 flex items-center gap-2 text-sm uppercase tracking-wide">
+            <span class="w-1 h-5 bg-blue-600 rounded-full"></span>
+            Asset Inventory
+        </h3>
+        <div class="space-y-5">
+            @foreach($stokKategori as $kat)
+            @php
+                $persenTersedia = ($kat->total > 0) ? ($kat->tersedia / $kat->total) * 100 : 0;
+                // Skema warna: Merah (Kritis), Oranye (Menipis), Biru (Aman)
+                $warnaBar = $persenTersedia < 30 ? 'bg-red-500' : ($persenTersedia < 70 ? 'bg-orange-500' : 'bg-blue-600');
+            @endphp
+            <div>
+                <div class="flex justify-between text-[11px] mb-1.5">
+                    <span class="font-bold text-slate-600 uppercase tracking-tight">{{ $kat->kategori_aset }}</span>
+                    <span class="text-slate-400 font-mono">{{ $kat->tersedia }}/{{ $kat->total }}</span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden border border-slate-200/50">
+                    <div class="{{ $warnaBar }} h-full transition-all duration-1000 ease-out shadow-sm" style="width: {{ $persenTersedia }}%"></div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+
+</div>
 
         {{-- MODAL POPUP FORM --}}
         <div 
@@ -415,3 +503,29 @@
         </div>
     </div>
 </x-app-layout>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('Script Check: Manual Placement');
+        
+        @if(isset($peminjamanTerlambat) && $peminjamanTerlambat->count() > 0)
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'warning',
+                title: 'Peringatan Jatuh Tempo!',
+                text: 'Ada {{ $peminjamanTerlambat->count() }} peminjaman yang melewati batas waktu.',
+                showConfirmButton: false,
+                timer: 8000,
+                timerProgressBar: true,
+                iconColor: '#fd2800',
+                background: '#1c1c1c',
+                color: '#ffffff',
+                customClass: {
+                    popup: 'rounded-2xl border border-white/10 shadow-2xl'
+                }
+            });
+        @endif
+    });
+</script>

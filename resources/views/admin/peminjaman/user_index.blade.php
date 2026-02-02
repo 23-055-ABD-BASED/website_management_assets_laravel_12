@@ -81,52 +81,66 @@
                         </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-200 bg-[#ededed]">
-                        @foreach($riwayat as $item)
-                            <tr class="hover:bg-white transition">
-                                <td class="px-6 py-4">
-                                    <div class="font-semibold text-[#171717]">
-                                        {{ $item->aset->nama_aset }}
-                                    </div>
-                                    <div class="text-xs text-gray-500">
-                                        {{ $item->aset->kode_aset }}
-                                    </div>
-                                </td>
+@foreach($riwayat as $item)
+    <tr class="hover:bg-white transition">
+        <td class="px-6 py-4">
+            <div class="font-semibold text-[#171717]">
+                {{ $item->aset->nama_aset }}
+            </div>
+            <div class="text-xs text-gray-500">
+                {{ $item->aset->kode_aset }}
+            </div>
+        </td>
 
-                                <td class="px-6 py-4">
-                                    <div class="font-medium text-[#171717]">
-                                        {{ \Carbon\Carbon::parse($item->tanggal_pinjam)->format('d M') }}
-                                        –
-                                        {{ \Carbon\Carbon::parse($item->tanggal_kembali)->format('d M Y') }}
-                                    </div>
-                                </td>
+        {{-- BAGIAN TANGGAL + SISA HARI --}}
+        <td class="px-6 py-4">
+            <div class="font-medium text-[#171717]">
+                {{ \Carbon\Carbon::parse($item->tanggal_pinjam)->format('d M') }}
+                –
+                {{ \Carbon\Carbon::parse($item->tanggal_kembali)->format('d M Y') }}
+            </div>
+            
+            @php
+                $tglKembali = \Carbon\Carbon::parse($item->tanggal_kembali);
+                $hariIni = \Carbon\Carbon::now()->startOfDay();
+                $selisih = $hariIni->diffInDays($tglKembali, false);
+            @endphp
 
-                                <td class="px-6 py-4 text-gray-600 italic max-w-xs truncate">
-                                    "{{ $item->alasan }}"
-                                </td>
+            @if($item->status == 'disetujui') {{-- Hanya muncul kalau sudah disetujui/dipinjam --}}
+                @if($selisih > 0)
+                    <div class="text-[10px] text-green-600 font-bold uppercase tracking-wider">Sisa {{ $selisih }} Hari</div>
+                @elseif($selisih == 0)
+                    <div class="text-[10px] text-orange-500 font-bold uppercase tracking-wider">Terakhir Hari Ini!</div>
+                @else
+                    <div class="text-[10px] text-red-600 font-bold uppercase tracking-wider">Terlambat {{ abs($selisih) }} Hari</div>
+                @endif
+            @endif
+        </td>
 
-                                <td class="px-6 py-4">
-                                    @php
-                                        $map = [
-                                            'pending' => 'bg-yellow-100 text-yellow-800',
-                                            'disetujui' => 'bg-green-100 text-green-800',
-                                            'ditolak' => 'bg-red-100 text-red-800',
-                                            'kembali' => 'bg-blue-100 text-blue-800',
-                                        ];
-                                    @endphp
-                                    <span class="px-3 py-1 rounded-full text-xs font-bold {{ $map[$item->status] ?? 'bg-gray-100 text-gray-800' }}">
-                                        {{ ucfirst($item->status) }}
-                                    </span>
-                                </td>
+        {{-- BAGIAN ALASAN (BIAR GAK KOSONG) --}}
+        <td class="px-6 py-4 text-gray-600 italic max-w-xs truncate text-sm">
+            "{{ $item->alasan ?: 'Tidak ada keterangan' }}"
+        </td>
 
-                                <td class="px-6 py-4 text-gray-500">
-                                    {{ $item->created_at->diffForHumans() }}
-                                </td>
-                            </tr>
-                        @endforeach
-                        </tbody>
-                    </table>
-                </div>
+        <td class="px-6 py-4">
+            @php
+                $map = [
+                    'pending' => 'bg-yellow-100 text-yellow-800',
+                    'disetujui' => 'bg-green-100 text-green-800',
+                    'ditolak' => 'bg-red-100 text-red-800',
+                    'kembali' => 'bg-blue-100 text-blue-800',
+                ];
+            @endphp
+            <span class="px-3 py-1 rounded-full text-[10px] font-bold {{ $map[$item->status] ?? 'bg-gray-100 text-gray-800' }}">
+                {{ ucfirst($item->status) }}
+            </span>
+        </td>
 
+        <td class="px-6 py-4 text-xs text-gray-500">
+            {{ $item->created_at->diffForHumans() }}
+        </td>
+    </tr>
+@endforeach
                 {{-- MOBILE CARDS --}}
                 <div class="md:hidden space-y-4">
                     @foreach($riwayat as $item)

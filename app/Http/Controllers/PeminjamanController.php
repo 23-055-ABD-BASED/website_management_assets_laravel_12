@@ -29,7 +29,7 @@ $pegawai = Auth::user()->pegawai;
 // CEK: aset ini sudah diajukan & masih pending oleh pegawai yang sama
 $cekPending = Peminjaman::where('id_pegawai', $pegawai->id_pegawai)
     ->where('id_aset', $request->id_aset)
-    ->where('status', 'pending')
+    ->where('status', 'menunggu')
     ->exists();
 
 if ($cekPending) {
