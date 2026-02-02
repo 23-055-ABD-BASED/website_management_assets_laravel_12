@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Pegawai extends Model
 {
@@ -18,12 +19,27 @@ class Pegawai extends Model
         'id_pengguna',
     ];
 
-public function user()
-{
-    return $this->belongsTo(
-        User::class,
-        'id_pengguna',
-        'id'
-    );
-}
+    // ===============================
+    // RELASI KE USER
+    // ===============================
+    public function user()
+    {
+        return $this->belongsTo(
+            User::class,
+            'id_pengguna',
+            'id'
+        );
+    }
+
+    // ===============================
+    // RELASI KE PEMINJAMAN (INI YANG KURANG)
+    // ===============================
+    public function peminjaman(): HasMany
+    {
+        return $this->hasMany(
+            Peminjaman::class,
+            'id_pegawai',
+            'id_pegawai'
+        );
+    }
 }

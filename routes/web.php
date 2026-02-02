@@ -15,6 +15,7 @@ use App\Models\Pegawai;
 use App\Models\Aset;
 use App\Models\Peminjaman;
 use Carbon\Carbon;
+use App\Http\Controllers\Admin\DashboardStatistikController;
 
 /*
 |--------------------------------------------------------------------------
@@ -107,75 +108,10 @@ Route::get('/dashboard', function () {
         // ==========================================
         // ADMIN DASHBOARD
         // ==========================================
-Route::get('/admin/dashboard', function () {
-    // 1. Helper function hitung pertumbuhan
-    $getGrowth = function ($model) {
-        $now = Carbon::now();
-        $currentMonth = $model::whereMonth('created_at', $now->month)->whereYear('created_at', $now->year)->count();
-        $lastMonth = $model::whereMonth('created_at', $now->subMonth()->month)->whereYear('created_at', $now->subMonth()->year)->count();
-        
-        $diff = $currentMonth - $lastMonth;
-        $percentage = $lastMonth > 0 ? round(($diff / $lastMonth) * 100, 1) : ($currentMonth > 0 ? 100 : 0);
-        
-        return [
-            'total' => $model::count(),
-            'diff' => $diff,
-            'percentage' => $percentage,
-            'is_positive' => $diff >= 0
-        ];
-    };
+Route::get('/admin/dashboard', [DashboardStatistikController::class, 'index'])
+    ->name('admin.dashboard')
+    ->middleware(['auth', 'admin']);
 
-    // 2. Hitung Statistik (Box Atas)
-    $stats = [
-        'pegawai' => $getGrowth(Pegawai::class),
-        'user'    => $getGrowth(User::class),
-        'aset'    => $getGrowth(Aset::class),
-        'pending_request' => Peminjaman::where('status', 'pending')->count() 
-    ];
-
-    // 3. Ambil Data Tabel Preview
-    $latestPegawai = Pegawai::latest()->take(5)->get();
-    $latestAset    = Aset::latest()->take(5)->get();
-
-    // 4. Statistik Stok Per Kategori (Untuk Area Kosong)
-    $stokKategori = Aset::select('kategori_aset')
-        ->selectRaw('count(*) as total')
-        ->selectRaw('sum(case when status_aset = "tersedia" then 1 else 0 end) as tersedia')
-        ->groupBy('kategori_aset')
-        ->get();
-
-    // 5. Data Peminjaman Terlambat
-    $today = Carbon::now()->format('Y-m-d');
-    $peminjamanTerlambat = Peminjaman::with(['pegawai', 'aset'])
-        ->where('status', 'disetujui')
-        ->whereNull('tanggal_kembali_real')
-        ->where('tanggal_kembali', '<', $today)
-        ->latest()
-        ->get();
-
-    // 6. Request Peminjaman Baru (Pending)
-    $incomingRequests = Peminjaman::with(['pegawai', 'aset'])
-        ->where('status', 'pending')
-        ->latest()
-        ->take(5)
-        ->get();
-
-    // 7. Data User untuk Modal
-    $users = User::where('role', '!=', 'admin')
-        ->doesntHave('pegawai')
-        ->get();
-
-    // 8. RETURN HANYA SATU KALI DI PALING BAWAH
-    return view('admin.dashboard', compact(
-        'stats', 
-        'latestPegawai', 
-        'latestAset', 
-        'users', 
-        'incomingRequests', 
-        'peminjamanTerlambat', 
-        'stokKategori'
-    ));
-})->name('admin.dashboard');
         // ==========================================
         //  FITUR LIVE CHAT ADMIN (Letakkan Disini)
         // ==========================================
