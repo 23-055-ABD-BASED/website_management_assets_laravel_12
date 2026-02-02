@@ -1,14 +1,21 @@
 <x-guest-layout>
-    <div class="min-h-screen flex items-center justify-center bg-[#ffffff]">
+    <div class="min-h-screen flex items-center justify-center bg-white relative">
+
+        <!-- ========== BACKGROUND IMAGE (MOBILE) ========== -->
+        <div class="absolute inset-0 lg:hidden bg-cover bg-center"
+            style="background-image: url('{{ asset('images/regsol.jpg') }}');">
+            <div class="absolute inset-0 bg-black/60"></div>
+        </div>
 
         <!-- ================= MAIN CARD ================= -->
-        <div class="w-full max-w-4xl mx-4 lg:mx-0 bg-white rounded-2xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-2">
+        <div
+            class="relative z-10 w-full max-w-4xl mx-4 lg:mx-0 rounded-2xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-2 bg-white/90 backdrop-blur-lg lg:bg-white">
 
-            <!-- ========== LEFT SIDE (IMAGE) ========== -->
+            <!-- ========== LEFT SIDE (IMAGE DESKTOP) ========== -->
             <div class="relative hidden lg:block overflow-hidden bg-[#171717]">
                 <div
                     class="absolute inset-0 bg-cover bg-center"
-                    style="background-image: url('{{ asset('images/regone.jpg') }}');"
+                    style="background-image: url('{{ asset('images/regsol.jpg') }}');"
                 ></div>
             </div>
 
@@ -40,6 +47,7 @@
                                 :value="old('email')"
                                 required
                                 autofocus
+                                placeholder="@gmail.com"
                                 class="mt-1 w-full rounded-lg border-gray-300 focus:border-[#fd2800] focus:ring-[#fd2800]"
                             />
                             <x-input-error :messages="$errors->get('email')" class="mt-2" />
@@ -48,8 +56,7 @@
                         <!-- SUBMIT -->
                         <button
                             type="submit"
-                            class="w-full py-3 rounded-lg bg-[#fd2800] text-white font-semibold hover:opacity-90 transition"
-                        >
+                            class="w-full py-3 rounded-lg bg-[#fd2800] text-white font-semibold hover:opacity-90 transition">
                             Kirim Link Reset Password
                         </button>
 
@@ -60,12 +67,10 @@
                                 Kembali ke Login
                             </a>
                         </div>
-
                     </form>
 
                 </div>
             </div>
-
         </div>
     </div>
 </x-guest-layout>
