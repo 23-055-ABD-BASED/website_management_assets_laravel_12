@@ -1,155 +1,147 @@
 {{-- ========================================================= --}}
-{{-- CHAT BANTUAN USER – FULL SCREEN ADMIN STYLE --}}
+{{-- CHAT BANTUAN USER – FINAL (STABIL & FIX TIMEZONE) --}}
 {{-- ========================================================= --}}
 
-{{-- ================= WRAPPER FIX (HALAMAN INI SAJA) ================= --}}
 <div
-    style="
-        position: fixed;
-        top: 5rem;        /* tinggi navbar */
-        left: 1rem;
-        right: 1rem;
-        bottom: 1rem;
-        z-index: 40;
-    "
+    style="position:fixed;top:5rem;left:1rem;right:1rem;bottom:1rem;z-index:40;"
 >
-    {{-- ================= CONTAINER UTAMA ================= --}}
-    <div class="flex flex-col h-full bg-slate-900 border border-slate-700
+    <div class="flex flex-col h-full bg-slate-900
+                border border-slate-700
                 rounded-2xl shadow-2xl overflow-hidden">
 
-        {{-- ================= HEADER (FIXED) ================= --}}
-        <div class="shrink-0 px-6 py-4 bg-slate-800 border-b border-slate-700
+        {{-- ================= HEADER ================= --}}
+        <div class="shrink-0 px-6 py-4 bg-slate-800
+                    border-b border-slate-700
                     flex justify-between items-center">
 
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full bg-[#fd2800]/20
                             flex items-center justify-center">
                     <svg class="w-5 h-5 text-[#fd2800]" fill="none"
-                         viewBox="0 0 24 24" stroke="currentColor">
+                         stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round"
                               stroke-linejoin="round"
                               stroke-width="2"
-                              d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                              d="M12 8v4l3 3"/>
                     </svg>
                 </div>
 
                 <div>
-                    <h3 class="font-semibold text-slate-100 text-sm md:text-base">
-                        Layanan Bantuan
-                    </h3>
-                    <p class="text-xs text-slate-400">
-                        Admin siap membantu Anda
-                    </p>
+                    <h3 class="font-semibold text-slate-100">Chat Bantuan</h3>
+                    <p class="text-xs text-slate-400">Terhubung dengan Admin</p>
                 </div>
             </div>
 
-            <span class="flex items-center gap-1.5 bg-[#fd2800]/15 text-[#fd2800]
-                         px-3 py-1 rounded-full text-[10px] font-semibold
-                         border border-[#fd2800]/30">
+            <span class="flex items-center gap-1.5
+                         bg-[#fd2800]/15 text-[#fd2800]
+                         px-3 py-1 rounded-full text-[10px] font-semibold">
                 <span class="w-1.5 h-1.5 rounded-full bg-[#fd2800] animate-pulse"></span>
                 ONLINE
             </span>
         </div>
 
-        {{-- ================= CHAT BODY (SCROLL SATU-SATUNYA) ================= --}}
+        {{-- 🔥 POLLING TERISOLASI (WAJIB) --}}
+        <div wire:poll.2s class="hidden"></div>
+
+        {{-- ================= CHAT BODY ================= --}}
         <div id="chat-container"
              class="flex-1 min-h-0 overflow-y-auto
                     p-4 md:p-6 space-y-5
-                    bg-slate-900 scroll-smooth"
-             wire:poll.2s>
+                    bg-slate-900 scroll-smooth">
 
             @forelse($this->messages as $msg)
                 @php $isMe = $msg->sender_id === auth()->id(); @endphp
 
                 <div class="flex {{ $isMe ? 'justify-end' : 'justify-start' }}">
-                    <div class="max-w-[80%] md:max-w-[60%] flex flex-col
+                    <div class="max-w-[80%] md:max-w-[60%]
+                                flex flex-col
                                 {{ $isMe ? 'items-end' : 'items-start' }}">
 
-                        {{-- Nama --}}
                         <span class="text-[10px] text-slate-400 mb-1 px-1">
-                            {{ $isMe ? 'Anda' : $msg->sender->username }}
+                            {{ $isMe ? 'Anda' : 'Admin' }}
                         </span>
 
-                        {{-- Bubble --}}
-                        <div class="px-4 py-2.5 rounded-2xl text-sm leading-relaxed shadow
+                        <div class="px-4 py-2.5 rounded-2xl shadow
                             {{ $isMe
                                 ? 'bg-[#fd2800] text-white rounded-br-none'
-                                : 'bg-slate-100 text-slate-800 rounded-bl-none' }}">
+                                : 'bg-slate-800 text-slate-100 rounded-bl-none' }}">
                             {{ $msg->message }}
                         </div>
 
-                        {{-- Waktu --}}
-                        <span class="text-[9px] text-slate-500 mt-1">
-                            {{ $msg->created_at->format('H:i') }}
+                        <span class="text-[9px] text-slate-500 mt-1 chat-time"
+                              data-time="{{ $msg->created_at->toIso8601String() }}">
                         </span>
                     </div>
                 </div>
             @empty
                 <div class="flex items-center justify-center h-full
-                            text-slate-400 text-sm">
+                            text-slate-400 italic text-sm">
                     Belum ada pesan
                 </div>
             @endforelse
         </div>
 
-        {{-- ================= INPUT (FIXED BAWAH) ================= --}}
-        <div class="shrink-0 p-4 bg-slate-800 border-t border-slate-700">
+        {{-- ================= INPUT ================= --}}
+        <div class="shrink-0 px-4 py-3 bg-slate-800 border-t border-slate-700">
             <form wire:submit.prevent="sendMessage"
-                  class="flex gap-2 items-center">
+                  class="flex items-center gap-3">
 
-                <input
-                    wire:model.defer="messageText"
-                    type="text"
-                    placeholder="Tulis pesan..."
-                    class="flex-1 bg-slate-900 text-slate-100 rounded-xl
-                           ring-1 ring-slate-600
-                           focus:ring-2 focus:ring-[#fd2800]
-                           placeholder:text-slate-400
-                           text-sm py-3 px-4">
+                <input wire:model.defer="messageText"
+                       type="text"
+                       placeholder="Tulis pesan..."
+                       class="flex-1 h-11 px-4 rounded-full
+                              bg-slate-900 text-slate-100 text-sm
+                              ring-1 ring-slate-600
+                              focus:ring-2 focus:ring-[#fd2800]
+                              outline-none">
 
                 <button type="submit"
-                        class="bg-[#fd2800] hover:bg-[#e02400]
-                               text-white px-4 py-3 rounded-xl
-                               shadow-md transition">
-                    Kirim
+                        class="h-11 w-11 rounded-full bg-[#fd2800]
+                               hover:bg-[#e02400]
+                               text-white flex items-center justify-center">
+                    ➤
                 </button>
             </form>
         </div>
-
     </div>
 </div>
-
-{{-- ================= AUTO SCROLL CERDAS ================= --}}
 <script>
-document.addEventListener('livewire:initialized', () => {
+document.addEventListener('livewire:load', () => {
     const container = document.getElementById('chat-container');
     if (!container) return;
 
-    let shouldAutoScroll = true;
+    let shouldScroll = true;
 
-    // cek apakah posisi scroll di bawah
-    const isAtBottom = () => {
-        return (
-            container.scrollTop + container.clientHeight
-            >= container.scrollHeight - 50
-        );
+    const scrollBottom = () => {
+        container.scrollTop = container.scrollHeight;
     };
 
-    // ketika user scroll manual
+    const convertChatTime = () => {
+        document.querySelectorAll('.chat-time').forEach(el => {
+            if (!el.dataset.time) return;
+            const d = new Date(el.dataset.time);
+            el.textContent = d.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        });
+    };
+
     container.addEventListener('scroll', () => {
-        shouldAutoScroll = isAtBottom();
+        shouldScroll =
+            container.scrollTop + container.clientHeight
+            >= container.scrollHeight - 50;
     });
 
-    // ketika Livewire update (polling / pesan baru)
-    Livewire.hook('morph.updated', () => {
-        if (shouldAutoScroll) {
-            container.scrollTop = container.scrollHeight;
-        }
+    Livewire.hook('message.processed', () => {
+        convertChatTime();
+        if (shouldScroll) scrollBottom();
     });
 
-    // scroll awal saat halaman pertama dibuka
+    // first load
     requestAnimationFrame(() => {
-        container.scrollTop = container.scrollHeight;
+        convertChatTime();
+        scrollBottom();
     });
 });
 </script>

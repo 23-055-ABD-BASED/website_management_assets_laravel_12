@@ -5,15 +5,19 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use App\Models\Pegawai;
-use App\Models\Message; // Import Model Message
+use App\Models\Message;
 
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
     /**
-     * The attributes that are mass assignable.
+     * ================================
+     * MASS ASSIGNABLE
+     * ================================
      */
     protected $fillable = [
         'username',
@@ -23,14 +27,18 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
+     * ================================
+     * HIDDEN
+     * ================================
      */
     protected $hidden = [
         'password',
     ];
 
     /**
-     * The attributes that should be cast.
+     * ================================
+     * CASTS
+     * ================================
      */
     protected function casts(): array
     {
@@ -41,54 +49,65 @@ class User extends Authenticatable
 
     /**
      * ================================
-     * HELPER ROLE (UNTUK CHAT)
+     * ROLE HELPER
      * ================================
      */
-    public function isAdmin()
+    public function isAdmin(): bool
     {
-        // Pastikan value 'admin' sesuai dengan isi kolom role di database Anda
-        // Jika di database tulisannya 'administrator', ganti jadi 'administrator'
         return $this->role === 'admin';
     }
 
     /**
      * ================================
-     * RELASI KE CHAT MESSAGE
+     * RELASI CHAT (BENAR & FINAL)
      * ================================
      */
-    public function chats()
-    {
-        // Relasi ke pesan di mana User ini adalah pemilik percakapan (user_id)
-        return $this->hasMany(Message::class, 'user_id');
-    }
+
+    // Pesan DITERIMA (receiver)
+        public function messagesReceived()
+        {
+            return $this->hasMany(Message::class, 'user_id');
+        }
+
+        // Pesan DIKIRIM (sender)
+        public function messagesSent()
+        {
+            return $this->hasMany(Message::class, 'sender_id');
+        }
+
+        // Pesan BELUM DIBACA (badge)
+        public function unreadMessages()
+        {
+            return $this->hasMany(Message::class, 'user_id')
+                ->where('is_read', 0);
+        }
+
 
     /**
      * ================================
-     * RELASI KE PEGAWAI
+     * RELASI PEGAWAI
      * ================================
      */
-    public function pegawai()
+    public function pegawai(): HasOne
     {
         return $this->hasOne(
             Pegawai::class,
-            'id_pengguna', 
+            'id_pengguna',
             'id'
         );
     }
 
     /**
      * ================================
-     * CEK APAKAH PEGAWAI AKTIF
+     * CEK PEGAWAI AKTIF
      * ================================
      */
     public function isPegawaiAktif(): bool
     {
-        // Jika user tidak punya data pegawai → dianggap TIDAK AKTIF
         if (!$this->pegawai) {
             return false;
         }
 
-        // Cek status pegawai
         return $this->pegawai->status_pegawai === 'aktif';
     }
 }
