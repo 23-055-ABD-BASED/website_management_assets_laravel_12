@@ -19,18 +19,32 @@ use App\Http\Controllers\Admin\DashboardStatistikController;
 
 /*
 |--------------------------------------------------------------------------
-| ROOT & LOGIN VIEW
+| ROOT & LANDING PAGE
 |--------------------------------------------------------------------------
 */
 Route::get('/', function () {
     if (Auth::check()) {
-        if (Auth::user()->role === 'admin') {
-            return redirect()->route('admin.dashboard');
-        }
-        return redirect()->route('dashboard');
+        // Kalau sudah login, arahkan sesuai role
+        return (Auth::user()->role === 'admin') 
+            ? redirect()->route('admin.dashboard') 
+            : redirect()->route('dashboard');
     }
-    return view('auth.login');
-})->name('login');
+    // Kalau belum login, tampilkan landing page biru lo
+    return view('welcome');
+})->name('landing');
+
+// JANGAN ADA Route::get('/') LAGI DI BAWAH INI
+
+// comand sek 
+// Route::get('/', function () {
+//     if (Auth::check()) {
+//         if (Auth::user()->role === 'admin') {
+//             return redirect()->route('admin.dashboard');
+//         }
+//         return redirect()->route('dashboard');
+//     }
+//     return view('auth.login');
+// })->name('login');
 
 // REGISTER VIEW & STORE (Guest)
 Route::get('/register', [RegisteredUserController::class, 'create'])->name('register');
@@ -41,6 +55,15 @@ Route::post('/register', [RegisteredUserController::class, 'store'])->name('regi
 | AUTH PROCESS (LOGIN/LOGOUT)
 |--------------------------------------------------------------------------
 */
+
+// tes
+Route::get('/tes-landing', function() {
+    return view('welcome');
+});
+
+// TAMBAHKAN BARIS INI (Untuk nampilin halaman login)
+Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
+
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
