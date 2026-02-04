@@ -6,7 +6,7 @@
     <title>ASETU</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <script>
+        <script>
         tailwind.config = {
             theme: {
                 extend: {
@@ -20,56 +20,133 @@
             }
         }
     </script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-        html {
-        scroll-behavior: smooth;
+
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #ededed;
         }
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #ededed; }
-        .glass-nav { background: rgba(237, 237, 237, 0.8); backdrop-filter: blur(12px); }
-        .hero-gradient { background: radial-gradient(circle at top right, rgba(253, 50, 0, 0.10), transparent); }
-        .btn-primary { background-color: #fd2800; transition: all 0.3s ease; }
-        .btn-primary:hover { background-color: #171717; transform: translateY(-2px); }
-        .card-hover:hover { border-color: #fd2800; transform: translateY(-5px); }
+
+        .glass-nav {
+            background: rgba(237, 237, 237, 0.8);
+            backdrop-filter: blur(12px);
+        }
+
+        .hero-gradient {
+            background: radial-gradient(circle at top right, rgba(253, 50, 0, 0.10), transparent);
+        }
+
+        .btn-primary {
+            background-color: #fd2800;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #171717;
+            transform: translateY(-2px);
+        }
+
+        .card-hover:hover {
+            border-color: #fd2800;
+            transform: translateY(-5px);
+        }
+
+        /* ===== MOBILE MENU ===== */
+        #mobile-menu {
+            transform: translateX(100%);
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(23, 23, 23, 0.45);
+            backdrop-filter: blur(12px);
+            isolation: isolate;
+        }
+        #mobile-menu.active {
+            transform: translateX(0);
+        }
+
+        #mobile-overlay {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+            background: rgba(0, 0, 0, 0.55);
+        }
+        #mobile-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
     </style>
 </head>
-<body class="text-dark">
 
-   <nav class="fixed w-full z-50 glass-nav border-b border-gray-200">
+<body class="text-dark overflow-x-hidden">
+
+<!-- ================= NAVBAR ================= -->
+<nav class="fixed top-0 left-0 right-0 z-50 glass-nav border-b border-gray-200">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-20 items-center">
-            
-            <div class="flex items-center">
-                <a href="/" class="flex items-center gap-3">
-                    <img src="{{ asset('images/logo_asetu.png') }}" alt="Logo" class="h-10 w-auto">
-                    </a>
-            </div>
+
+            <a href="/" class="flex items-center gap-3">
+                <img src="{{ asset('images/logo_asetu.png') }}" alt="Logo" class="h-10 w-auto">
+            </a>
 
             <div class="hidden md:flex items-center gap-8 text-sm font-bold uppercase tracking-widest">
                 <a href="#fitur" class="hover:text-primary transition">Fitur</a>
                 <a href="#tentang" class="hover:text-primary transition">Tentang</a>
-                
+
                 @if (Route::has('login'))
                     @auth
                         <a href="{{ url('/dashboard') }}" class="btn-primary px-6 py-3 text-white rounded-full">Dashboard</a>
                     @else
                         <div class="flex items-center gap-4">
-                            <a href="{{ route('login') }}" class="text-dark hover:text-primary transition">Masuk</a>
+                            <a href="{{ route('login') }}" class="hover:text-primary transition">Masuk</a>
                             <a href="{{ route('register') }}" class="btn-primary px-6 py-3 text-white rounded-full shadow-lg shadow-primary/20">Registrasi</a>
                         </div>
                     @endauth
                 @endif
             </div>
 
-            <div class="md:hidden">
-                <button class="text-dark p-2">
-                    <i class="fas fa-bars text-2xl"></i>
-                </button>
-            </div>
+            <button id="mobile-menu-button" class="md:hidden p-2 z-[60]">
+                <i id="hamburger-icon" class="fas fa-bars text-2xl transition-all"></i>
+            </button>
 
         </div>
     </div>
 </nav>
+
+<!-- ================= MOBILE OVERLAY ================= -->
+<div id="mobile-overlay" class="fixed inset-0 z-40 md:hidden"></div>
+
+<!-- ================= MOBILE MENU ================= -->
+<div id="mobile-menu"
+     class="fixed top-20 right-0 bottom-0 w-[80%] max-w-sm z-50 shadow-2xl md:hidden">
+
+    <div class="flex flex-col h-full p-8">
+        <div class="space-y-6 text-right font-bold uppercase tracking-widest text-lg text-white">
+            <a href="#fitur" class="mobile-link block py-2 hover:text-primary">Fitur</a>
+            <a href="#tentang" class="mobile-link block py-2 hover:text-primary">Tentang</a>
+
+            <hr class="border-white/10 my-6">
+
+            @if (Route::has('login'))
+                @auth
+                    <a href="{{ url('/dashboard') }}" class="mobile-link block btn-primary py-4 rounded-xl text-center">Dashboard</a>
+                @else
+                    <a href="{{ route('login') }}" class="mobile-link block py-2 hover:text-primary">Masuk</a>
+                    <a href="{{ route('register') }}" class="mobile-link block btn-primary py-4 rounded-xl text-center shadow-lg shadow-primary/20">Registrasi</a>
+                @endif
+            @endif
+        </div>
+
+        <div class="mt-auto pb-8 text-center">
+            <p class="text-gray-400 text-xs uppercase tracking-widest mb-4">ASETU Inventory 2.0</p>
+            <div class="flex justify-center gap-6 text-white/50">
+                <i class="fab fa-linkedin"></i>
+                <i class="fab fa-github"></i>
+                <i class="fab fa-instagram"></i>
+            </div>
+        </div>
+    </div>
+</div>
 
     <section class="relative pt-40 pb-24 hero-gradient overflow-hidden">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -166,7 +243,7 @@
                 <div class="text-center md:text-right">
                     <p class="text-gray-400 font-bold mb-2 uppercase tracking-widest text-xs">Developed By</p>
                     <p class="text-xl font-black text-white italic">Trunojoyo Maha Asiq Indehoy Team</p>
-                    <p class="text-sm text-gray-500 mt-2 font-medium">© 2026 ASSET-SYSTEM Enterprise. Seluruh hak cipta dilindungi undang-undang.</p>
+                    <p class="text-sm text-gray-500 mt-2 font-medium">© 2026 Asetu Trunojoyo. Seluruh hak cipta dilindungi undang-undang.</p>
                 </div>
             </div>
 
@@ -181,4 +258,30 @@
     </footer>
 
 </body>
+<script>
+    const btn = document.getElementById('mobile-menu-button');
+    const menu = document.getElementById('mobile-menu');
+    const overlay = document.getElementById('mobile-overlay');
+    const icon = document.getElementById('hamburger-icon');
+    const links = document.querySelectorAll('.mobile-link');
+
+    function toggleMenu() {
+        menu.classList.toggle('active');
+        overlay.classList.toggle('active');
+
+        if (menu.classList.contains('active')) {
+            icon.classList.replace('fa-bars', 'fa-times');
+            icon.classList.add('text-white');
+            document.body.style.overflow = 'hidden';
+        } else {
+            icon.classList.replace('fa-times', 'fa-bars');
+            icon.classList.remove('text-white');
+            document.body.style.overflow = 'auto';
+        }
+    }
+
+    btn.addEventListener('click', toggleMenu);
+    overlay.addEventListener('click', toggleMenu);
+    links.forEach(link => link.addEventListener('click', toggleMenu));
+</script>
 </html>
