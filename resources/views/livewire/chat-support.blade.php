@@ -1,147 +1,169 @@
 {{-- ========================================================= --}}
-{{-- CHAT BANTUAN USER – FINAL (STABIL & FIX TIMEZONE) --}}
+{{-- CHAT SUPPORT – PROFESSIONAL RESPONSIVE UI --}}
 {{-- ========================================================= --}}
 
-<div
-    style="position:fixed;top:5rem;left:1rem;right:1rem;bottom:1rem;z-index:40;"
->
-    <div class="flex flex-col h-full bg-slate-900
-                border border-slate-700
-                rounded-2xl shadow-2xl overflow-hidden">
+<div class="fixed inset-x-3 md:inset-x-6 top-16 md:top-20 bottom-4 z-40">
+    <div class="flex flex-col h-full bg-white
+                border border-slate-200
+                rounded-2xl shadow-xl overflow-hidden">
 
         {{-- ================= HEADER ================= --}}
-        <div class="shrink-0 px-6 py-4 bg-slate-800
-                    border-b border-slate-700
-                    flex justify-between items-center">
+        <div class="shrink-0 px-5 md:px-6 py-4
+                    bg-white border-b border-slate-100">
 
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-[#fd2800]/20
-                            flex items-center justify-center">
-                    <svg class="w-5 h-5 text-[#fd2800]" fill="none"
-                         stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M12 8v4l3 3"/>
-                    </svg>
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-11 h-11 rounded-xl
+                                bg-[#fd2800]/10
+                                flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             class="w-6 h-6 text-[#fd2800]"
+                             fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                  d="M7 8h10M7 12h6m-6 4h8" />
+                        </svg>
+                    </div>
+
+                    <div>
+                        <h2 class="text-[15px] font-semibold text-slate-800">
+                            Support Center
+                        </h2>
+                        <p class="text-[11px] text-slate-500 font-medium">
+                            Layanan bantuan resmi
+                        </p>
+                    </div>
                 </div>
 
-                <div>
-                    <h3 class="font-semibold text-slate-100">Chat Bantuan</h3>
-                    <p class="text-xs text-slate-400">Terhubung dengan Admin</p>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span class="text-[11px] font-semibold text-emerald-600 uppercase">
+                        Online
+                    </span>
                 </div>
             </div>
-
-            <span class="flex items-center gap-1.5
-                         bg-[#fd2800]/15 text-[#fd2800]
-                         px-3 py-1 rounded-full text-[10px] font-semibold">
-                <span class="w-1.5 h-1.5 rounded-full bg-[#fd2800] animate-pulse"></span>
-                ONLINE
-            </span>
         </div>
 
-        {{-- 🔥 POLLING TERISOLASI (WAJIB) --}}
+        {{-- POLLING --}}
         <div wire:poll.2s class="hidden"></div>
 
         {{-- ================= CHAT BODY ================= --}}
         <div id="chat-container"
-             class="flex-1 min-h-0 overflow-y-auto
-                    p-4 md:p-6 space-y-5
-                    bg-slate-900 scroll-smooth">
+             class="flex-1 overflow-y-auto
+                    px-4 md:px-6 py-6
+                    space-y-6 bg-slate-50">
 
-            @forelse($this->messages as $msg)
+            {{-- Info --}}
+            <div class="flex justify-center">
+                <div class="px-4 py-2 rounded-lg
+                            bg-slate-100 border border-slate-200">
+                    <p class="text-[10px] text-slate-500 font-semibold tracking-wide uppercase">
+                        Percakapan bersifat pribadi dan aman
+                    </p>
+                </div>
+            </div>
+
+            @foreach($messages as $msg)
                 @php $isMe = $msg->sender_id === auth()->id(); @endphp
 
                 <div class="flex {{ $isMe ? 'justify-end' : 'justify-start' }}">
-                    <div class="max-w-[80%] md:max-w-[60%]
+                    <div class="max-w-[90%] sm:max-w-[75%] md:max-w-[65%]
                                 flex flex-col
                                 {{ $isMe ? 'items-end' : 'items-start' }}">
 
-                        <span class="text-[10px] text-slate-400 mb-1 px-1">
-                            {{ $isMe ? 'Anda' : 'Admin' }}
-                        </span>
-
-                        <div class="px-4 py-2.5 rounded-2xl shadow
+                        <div class="px-4 py-3 rounded-xl text-sm leading-relaxed
                             {{ $isMe
                                 ? 'bg-[#fd2800] text-white rounded-br-none'
-                                : 'bg-slate-800 text-slate-100 rounded-bl-none' }}">
+                                : 'bg-white border border-slate-200 text-slate-800 rounded-bl-none' }}">
                             {{ $msg->message }}
                         </div>
 
-                        <span class="text-[9px] text-slate-500 mt-1 chat-time"
-                              data-time="{{ $msg->created_at->toIso8601String() }}">
+                        <span class="mt-1.5 text-[10px] text-slate-400 font-medium">
+                            {{ $msg->created_at->timezone('Asia/Jakarta')->format('H:i') }}
                         </span>
                     </div>
                 </div>
-            @empty
-                <div class="flex items-center justify-center h-full
-                            text-slate-400 italic text-sm">
-                    Belum ada pesan
-                </div>
-            @endforelse
+            @endforeach
         </div>
 
         {{-- ================= INPUT ================= --}}
-        <div class="shrink-0 px-4 py-3 bg-slate-800 border-t border-slate-700">
+        <div class="shrink-0 px-4 md:px-6 py-4
+                    bg-white border-t border-slate-100">
+
             <form wire:submit.prevent="sendMessage"
                   class="flex items-center gap-3">
 
                 <input wire:model.defer="messageText"
                        type="text"
                        placeholder="Tulis pesan..."
-                       class="flex-1 h-11 px-4 rounded-full
-                              bg-slate-900 text-slate-100 text-sm
-                              ring-1 ring-slate-600
-                              focus:ring-2 focus:ring-[#fd2800]
-                              outline-none">
+                       class="flex-1 h-12 px-5 rounded-xl
+                              bg-slate-50 border border-slate-200
+                              text-slate-800 text-sm
+                              focus:ring-4 focus:ring-[#fd2800]/10
+                              focus:border-[#fd2800]/30
+                              outline-none transition">
 
-                <button type="submit"
-                        class="h-11 w-11 rounded-full bg-[#fd2800]
-                               hover:bg-[#e02400]
-                               text-white flex items-center justify-center">
-                    ➤
+                <button
+                    class="h-12 w-12 rounded-xl
+                           bg-[#fd2800] text-white
+                           flex items-center justify-center
+                           hover:bg-[#e02400]
+                           active:scale-95 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         class="h-5 w-5"
+                         fill="none" viewBox="0 0 24 24"
+                         stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                              d="M5 12h14M13 5l7 7-7 7" />
+                    </svg>
                 </button>
             </form>
+
+            <p class="mt-2 text-center text-[10px]
+                      text-slate-400 font-medium">
+                Tekan Enter untuk mengirim pesan
+            </p>
         </div>
     </div>
 </div>
+
+
 <script>
-document.addEventListener('livewire:load', () => {
+document.addEventListener('livewire:initialized', () => {
     const container = document.getElementById('chat-container');
-    if (!container) return;
 
-    let shouldScroll = true;
-
-    const scrollBottom = () => {
-        container.scrollTop = container.scrollHeight;
-    };
-
-    const convertChatTime = () => {
-        document.querySelectorAll('.chat-time').forEach(el => {
-            if (!el.dataset.time) return;
-            const d = new Date(el.dataset.time);
-            el.textContent = d.toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit'
+    const scrollBottom = (behavior = 'smooth') => {
+        if (container) {
+            container.scrollTo({
+                top: container.scrollHeight,
+                behavior: behavior
             });
-        });
+        }
     };
 
-    container.addEventListener('scroll', () => {
-        shouldScroll =
-            container.scrollTop + container.clientHeight
-            >= container.scrollHeight - 50;
+    const isUserAtBottom = () => {
+        const threshold = 150;
+        return container.scrollTop + container.clientHeight >= container.scrollHeight - threshold;
+    };
+
+    // 1. Initial Scroll saat chat dibuka
+    setTimeout(() => {
+        scrollBottom('auto');
+    }, 150);
+
+    // 2. Saat pesan baru masuk (Polling)
+    Livewire.on('messages-updated', () => {
+        requestAnimationFrame(() => {
+            if (isUserAtBottom()) {
+                scrollBottom('smooth');
+            }
+        });
     });
 
-    Livewire.hook('message.processed', () => {
-        convertChatTime();
-        if (shouldScroll) scrollBottom();
-    });
-
-    // first load
-    requestAnimationFrame(() => {
-        convertChatTime();
-        scrollBottom();
+    // 3. Saat user mengirim pesan sendiri
+    Livewire.on('chat-sent', () => {
+        requestAnimationFrame(() => {
+            scrollBottom('smooth');
+        });
     });
 });
 </script>

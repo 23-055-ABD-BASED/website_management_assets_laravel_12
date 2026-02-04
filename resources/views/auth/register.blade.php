@@ -1,7 +1,7 @@
 <x-guest-layout>
     <div
         class="min-h-screen flex items-center justify-center bg-cover bg-center relative"
-        style="background-image: url('{{ asset('images/regone.jpg') }}');"
+        style="background-image: url('{{ asset('images/reggjo.jpg') }}');"
     >
 
         <!-- OVERLAY -->
@@ -19,7 +19,7 @@
                     <!-- IMAGE -->
                     <div
                         class="absolute inset-0 bg-cover bg-center"
-                        style="background-image: url('{{ asset('images/regone.jpg') }}');"
+                        style="background-image: url('{{ asset('images/reggjo.jpg') }}');"
                     ></div>
 
                     <!-- BLOBS -->
@@ -68,9 +68,31 @@
                                     :value="old('username')"
                                     required
                                     autofocus
+                                    placeholder="Username"
                                     class="mt-1 w-full rounded-lg border-gray-300 focus:border-[#fd2800] focus:ring-[#fd2800]"
                                 />
                                 <x-input-error :messages="$errors->get('username')" class="mt-2" />
+                            </div>
+
+                            <!-- EMAIL -->
+                            <div class="mt-4">
+                                <label for="email" class="block text-sm font-medium text-gray-700">
+                                    Email
+                                </label>
+
+                                <input
+                                    id="email"
+                                    name="email"
+                                    type="email"
+                                    value="{{ old('email') }}"
+                                    required
+                                    placeholder="@gmail.com"
+                                    class="mt-1 block w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                                >
+
+                                @error('email')
+                                    <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                                @enderror
                             </div>
 
                             <!-- PASSWORD -->
@@ -83,6 +105,7 @@
                                         name="password"
                                         type="password"
                                         required
+                                        placeholder="Password"
                                         class="mt-1 w-full rounded-lg border-gray-300 focus:border-[#fd2800] focus:ring-[#fd2800] pr-10"
                                     />
                                     <button
@@ -108,6 +131,7 @@
                                         name="password_confirmation"
                                         type="password"
                                         required
+                                        placeholder="Confirm Password"
                                         class="mt-1 w-full rounded-lg border-gray-300 focus:border-[#fd2800] focus:ring-[#fd2800] pr-10"
                                     />
 

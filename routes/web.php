@@ -22,6 +22,7 @@ use App\Models\Aset;
 use App\Models\Peminjaman;
 
 use Carbon\Carbon;
+use App\Http\Controllers\Admin\DashboardStatistikController;
 
 /*
 |--------------------------------------------------------------------------
@@ -51,7 +52,6 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 |--------------------------------------------------------------------------
 */
 Route::middleware('auth')->group(function () {
-
 
     /*
     |--------------------------------------------------------------------------
@@ -117,67 +117,150 @@ Route::middleware('auth')->group(function () {
     Route::middleware('admin')->group(function () {
 
         /*
-        | ADMIN DASHBOARD
+        | ADMIN DASHBOARD (PERBAIKAN LENGKAP - DATA SUDAH ADA SEMUA)
         */
         Route::get('/admin/dashboard', function () {
 
+            // 1. Helper Function untuk Growth
             $getGrowth = function ($model) {
                 $now = Carbon::now();
-
-                $current = $model::whereMonth('created_at', $now->month)
+                $currentMonth = $model::whereMonth('created_at', $now->month)
                     ->whereYear('created_at', $now->year)
                     ->count();
-
-                $last = $model::whereMonth('created_at', $now->copy()->subMonth()->month)
+                $lastMonth = $model::whereMonth('created_at', $now->copy()->subMonth()->month)
                     ->whereYear('created_at', $now->copy()->subMonth()->year)
                     ->count();
-
-                $diff = $current - $last;
-                $percentage = $last > 0
-                    ? round(($diff / $last) * 100, 1)
-                    : ($current > 0 ? 100 : 0);
+                $diff = $currentMonth - $lastMonth;
+                $percentage = $lastMonth > 0
+                    ? round(($diff / $lastMonth) * 100, 1)
+                    : ($currentMonth > 0 ? 100 : 0);
 
                 return [
-                    'total' => $model::count(),
-                    'diff' => $diff,
+                    'total'      => $model::count(),
+                    'diff'       => $diff,
                     'percentage' => $percentage,
-                    'is_positive' => $diff >= 0,
+                    'is_positive' => $diff >= 0
                 ];
             };
 
+            // 2. Data Utama (Total & Growth)
+            $total = [
+                'user'       => User::count(),
+                'pegawai'    => Pegawai::count(),
+                'aset'       => Aset::count(),
+                'peminjaman' => Peminjaman::count(),
+            ];
+
+            $growth = [
+                'user'       => $getGrowth(User::class),
+                'pegawai'    => $getGrowth(Pegawai::class),
+                'aset'       => $getGrowth(Aset::class),
+                'peminjaman' => $getGrowth(Peminjaman::class),
+            ];
+
+            // 3. Stats untuk Card Dashboard
             $stats = [
-                'pegawai' => $getGrowth(Pegawai::class),
-                'user' => $getGrowth(User::class),
-                'aset' => $getGrowth(Aset::class),
+                'pegawai' => $growth['pegawai'],
+                'user'    => $growth['user'],
+                'aset'    => $growth['aset'],
                 'pending_request' => Peminjaman::where('status', 'pending')->count(),
             ];
 
-            return view('admin.dashboard', [
-                'stats' => $stats,
-                'latestPegawai' => Pegawai::latest()->take(5)->get(),
-                'latestAset' => Aset::latest()->take(5)->get(),
-                'users' => User::where('role', '!=', 'admin')->doesntHave('pegawai')->get(),
-                'incomingRequests' => Peminjaman::with(['pegawai', 'aset'])
-                    ->where('status', 'pending')
-                    ->latest()
-                    ->take(5)
-                    ->get(),
-                'peminjamanTerlambat' => Peminjaman::with(['pegawai', 'aset'])
-                    ->where('status', 'disetujui')
-                    ->whereNull('tanggal_kembali_real')
-                    ->where('tanggal_kembali', '<', now())
-                    ->get(),
-                'stokKategori' => Aset::select('kategori_aset')
-                    ->selectRaw('count(*) as total')
-                    ->selectRaw('sum(case when status_aset="tersedia" then 1 else 0 end) as tersedia')
-                    ->groupBy('kategori_aset')
-                    ->get(),
-            ]);
+            // 4. DATA CHART & TABLE
+            $peminjamanBulanan = Peminjaman::selectRaw('MONTH(created_at) as bulan')
+                ->selectRaw('COUNT(*) as total')
+                ->whereYear('created_at', now()->year)
+                ->groupBy('bulan')
+                ->orderBy('bulan')
+                ->get();
+
+            $topPeminjam = Peminjaman::select('id_pegawai')
+                ->selectRaw('COUNT(*) as total')
+                ->whereYear('tanggal_pinjam', now()->year)
+                ->whereHas('pegawai', function ($q) {
+                    $q->where('status_pegawai', 'aktif');
+                })
+                ->groupBy('id_pegawai')
+                ->with('pegawai')
+                ->orderByDesc('total')
+                ->limit(5)
+                ->get();
+
+            $peminjamanTrend = Peminjaman::selectRaw('YEAR(created_at) as tahun')
+                ->selectRaw('MONTH(created_at) as bulan')
+                ->selectRaw('COUNT(*) as total')
+                ->where('created_at', '>=', now()->subMonths(12))
+                ->groupBy('tahun', 'bulan')
+                ->orderBy('tahun')
+                ->orderBy('bulan')
+                ->get();
+
+            $assetHealth = [
+                'tersedia'  => Aset::where('status_aset', 'tersedia')->count(),
+                'digunakan' => Aset::where('status_aset', 'digunakan')->count(),
+                'rusak'     => Aset::where('status_aset', 'rusak')->count(),
+            ];
+
+            $rataDurasiPinjam = round(
+                Peminjaman::whereNotNull('tanggal_kembali_real')
+                    ->selectRaw('AVG(DATEDIFF(tanggal_kembali_real, tanggal_pinjam))')
+                    ->value('AVG(DATEDIFF(tanggal_kembali_real, tanggal_pinjam))')
+            ) ?? 0;
+
+            $pegawaiAktif = Pegawai::where('status_pegawai', 'aktif')->count();
+            $pegawaiTidakAktif = Pegawai::where('status_pegawai', 'nonaktif')->count();
+
+            $totalDisetujui = Peminjaman::where('status', 'disetujui')->count();
+            $terlambat = Peminjaman::where('status', 'disetujui')
+                ->whereColumn('tanggal_kembali_real', '>', 'tanggal_kembali')
+                ->count();
+
+            $tingkatKeterlambatan = $totalDisetujui > 0
+                ? round(($terlambat / $totalDisetujui) * 100, 1)
+                : 0;
+
+            $stokKategori = Aset::select('kategori_aset')
+                ->selectRaw('COUNT(*) as total')
+                ->selectRaw('SUM(status_aset = "tersedia") as tersedia')
+                ->groupBy('kategori_aset')
+                ->get();
+
+            // 5. Data List Table
+            $latestPegawai = Pegawai::latest()->take(5)->get();
+            $latestAset    = Aset::latest()->take(5)->get();
+            
+            $incomingRequests = Peminjaman::with(['pegawai', 'aset'])
+                ->where('status', 'pending')
+                ->latest()
+                ->take(5)
+                ->get();
+
+            $peminjamanTerlambat = Peminjaman::with(['pegawai', 'aset'])
+                ->where('status', 'disetujui')
+                ->whereNull('tanggal_kembali_real')
+                ->where('tanggal_kembali', '<', now())
+                ->get();
+
+            $users = User::where('role', '!=', 'admin')
+                ->doesntHave('pegawai')
+                ->get();
+
+            // Return View dengan data LENGKAP
+            return view('admin.dashboard', compact(
+                'total', 'growth', 'stats', 
+                'peminjamanBulanan', 'topPeminjam', 'peminjamanTrend', 
+                'assetHealth', 'rataDurasiPinjam', 
+                'pegawaiAktif', 'pegawaiTidakAktif', 'tingkatKeterlambatan',
+                'latestPegawai', 'latestAset', 'stokKategori',
+                'incomingRequests', 'peminjamanTerlambat', 'users'
+            ));
+
         })->name('admin.dashboard');
 
         /*
-        | ADMIN CHAT (LIVEWIRE – SATU-SATUNYA)
+        | FITUR LIVE CHAT ADMIN
         */
+        
         Route::get('/admin/chat', AdminChat::class)
             ->name('admin.chat.index');
 
@@ -210,15 +293,14 @@ Route::middleware('auth')->group(function () {
         | ADMIN PEGAWAI
         */
         Route::resource('pegawai', PegawaiController::class)->except(['create', 'store']);
-    });
+    }); 
 
     /*
-    |--------------------------------------------------------------------------
     | CETAK PDF
-    |--------------------------------------------------------------------------
     */
     Route::get('/admin/peminjaman/cetak-pdf', [PeminjamanController::class, 'cetakPdf'])
         ->name('admin.peminjaman.cetak-pdf');
-});
+
+}); // <-- Tutup Auth Middleware
 
 require __DIR__ . '/auth.php';

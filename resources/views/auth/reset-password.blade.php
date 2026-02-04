@@ -1,14 +1,21 @@
 <x-guest-layout>
-    <div class="min-h-screen flex items-center justify-center bg-[#ffffff]">
+    <div class="min-h-screen flex items-center justify-center bg-white relative">
+
+        <!-- ========== BACKGROUND IMAGE (MOBILE) ========== -->
+        <div class="absolute inset-0 lg:hidden bg-cover bg-center"
+            style="background-image: url('{{ asset('images/regjjk.jpg') }}');">
+            <div class="absolute inset-0 bg-black/60"></div>
+        </div>
 
         <!-- ================= MAIN CARD ================= -->
-        <div class="w-full max-w-4xl mx-4 lg:mx-0 bg-white rounded-2xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-2">
+        <div
+            class="relative z-10 w-full max-w-4xl mx-4 lg:mx-0 rounded-2xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-2 bg-white/90 backdrop-blur-lg lg:bg-white">
 
-            <!-- ========== LEFT SIDE (IMAGE) ========== -->
+            <!-- ========== LEFT SIDE (IMAGE DESKTOP) ========== -->
             <div class="relative hidden lg:block overflow-hidden bg-[#171717]">
                 <div
                     class="absolute inset-0 bg-cover bg-center"
-                    style="background-image: url('{{ asset('images/regone.jpg') }}');"
+                    style="background-image: url('{{ asset('images/regjjk.jpg') }}');"
                 ></div>
             </div>
 
@@ -40,6 +47,7 @@
                                 :value="old('email', $request->email)"
                                 required
                                 autofocus
+                                placeholder="@gmail.com"
                                 class="mt-1 w-full rounded-lg border-gray-300 focus:border-[#fd2800] focus:ring-[#fd2800]"
                             />
                             <x-input-error :messages="$errors->get('email')" class="mt-2" />
@@ -55,13 +63,14 @@
                                     name="password"
                                     type="password"
                                     required
+                                    placeholder="New Password"
                                     class="mt-1 w-full rounded-lg border-gray-300 focus:border-[#fd2800] focus:ring-[#fd2800] pr-10"
                                 />
 
                                 <!-- ICON MATA -->
                                 <button
                                     type="button"
-                                    onclick="togglePassword('reset_password', this)"
+                                    onclick="toggleResetPassword(this)"
                                     class="absolute inset-y-0 right-3 flex items-center"
                                 >
                                     <img src="{{ asset('images/visible.png') }}" class="eye-open w-5 h-5">
@@ -82,6 +91,7 @@
                                     name="password_confirmation"
                                     type="password"
                                     required
+                                    placeholder="Confirm Password"
                                     class="mt-1 w-full rounded-lg border-gray-300 focus:border-[#fd2800] focus:ring-[#fd2800] pr-10"
                                 />
                             </div>
@@ -115,19 +125,19 @@
 
 <!-- TOGGLE PASSWORD -->
 <script>
-function togglePassword(inputId, btn) {
-    const input = document.getElementById(inputId);
+function toggleResetPassword(btn) {
+    const password = document.getElementById('reset_password');
+    const confirm = document.getElementById('reset_password_confirmation');
+
     const eyeOpen = btn.querySelector('.eye-open');
     const eyeClosed = btn.querySelector('.eye-closed');
 
-    if (input.type === "password") {
-        input.type = "text";
-        eyeOpen.classList.add("hidden");
-        eyeClosed.classList.remove("hidden");
-    } else {
-        input.type = "password";
-        eyeOpen.classList.remove("hidden");
-        eyeClosed.classList.add("hidden");
-    }
+    const isHidden = password.type === "password";
+
+    password.type = isHidden ? "text" : "password";
+    confirm.type = isHidden ? "text" : "password";
+
+    eyeOpen.classList.toggle("hidden", isHidden);
+    eyeClosed.classList.toggle("hidden", !isHidden);
 }
 </script>

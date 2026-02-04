@@ -1,7 +1,7 @@
 <x-guest-layout>
     <div
         class="min-h-screen flex items-center justify-center bg-cover bg-center relative"
-        style="background-image: url('{{ asset('images/regfive.jpg') }}');"
+        style="background-image: url('{{ asset('images/regsjw.jpg') }}');"
     >
 
         <!-- OVERLAY -->
@@ -19,7 +19,7 @@
                 <!-- IMAGE -->
                 <div
                     class="absolute inset-0 bg-cover bg-center opacity-100"
-                    style="background-image: url('{{ asset('images/regfive.jpg') }}');"
+                    style="background-image: url('{{ asset('images/regsjw.jpg') }}');"
                 ></div>
 
                 {{-- <!-- BLOBS -->
@@ -60,19 +60,22 @@
                     <form  id="login-form" method="POST" action="{{ route('login.post') }}" class="mt-6 space-y-5" >
                         @csrf
 
-                        <!-- USERNAME -->
+                        <!-- USERNAME / EMAIL -->
                         <div>
-                            <x-input-label for="username" value="Username" class="text-[#444444]" />
+                            <x-input-label for="login" value="Username atau Email" class="text-[#444444]" />
+
                             <x-text-input
-                                id="username"
-                                name="username"
+                                id="login"
+                                name="login"
                                 type="text"
-                                :value="old('username')"
+                                :value="old('login')"
                                 required
                                 autofocus
+                                placeholder="username atau email"
                                 class="mt-1 w-full rounded-lg border-gray-300 focus:border-[#fd2800] focus:ring-[#fd2800]"
                             />
-                            <x-input-error :messages="$errors->get('username')" class="mt-2" />
+
+                            <x-input-error :messages="$errors->get('login')" class="mt-2" />
                         </div>
 
                         <!-- PASSWORD -->
@@ -85,6 +88,7 @@
                                     name="password"
                                     type="password"
                                     required
+                                    placeholder="Password"
                                     class="mt-1 w-full rounded-lg border-gray-300 focus:border-[#fd2800] focus:ring-[#fd2800] pr-10"
                                 />
 

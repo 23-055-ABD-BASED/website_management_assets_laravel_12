@@ -84,10 +84,10 @@ echo "   - Admin dashboard route: " . (strpos($routes, "'/admin/dashboard'") !==
 echo "\n";
 
 echo "========================================\n";
-echo "✅ Configuration check completed!\n";
+echo "Configuration check completed!\n";
 echo "========================================\n\n";
 
-echo "📋 NEXT STEPS:\n";
+echo "NEXT STEPS:\n";
 echo "1. Run: php artisan migrate (if not done)\n";
 echo "2. Run: php artisan config:clear\n";
 echo "3. Run: php artisan cache:clear\n";
