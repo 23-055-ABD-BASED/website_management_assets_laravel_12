@@ -37,7 +37,6 @@
         {{-- 1. SCRIPT KHUSUS ADMIN (NOTIFIKASI REALTIME)            --}}
         {{-- ======================================================= --}}
         @if(auth()->check() && auth()->user()->role === 'admin')
-            <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script> 
             <script>
                 document.addEventListener('DOMContentLoaded', function () {
                     let lastCount = 0; 
@@ -47,29 +46,49 @@
                         axios.get('{{ route("admin.check.pending") }}')
                             .then(function (response) {
                                 let currentCount = response.data.count;
+                                let latestUser = response.data.latest_user;
+                                let latestAset = response.data.latest_aset;
                                 
-                                // Update Badge Menu
+                                // 1. Update Badge Menu (Angka di samping menu peminjaman)
                                 let badge = document.getElementById('pending-badge');
                                 if(badge) {
                                     badge.innerText = currentCount;
                                     badge.style.display = currentCount > 0 ? 'inline-flex' : 'none';
                                 }
 
-                                // Trigger Notifikasi Suara & Popup
+                                // 2. Trigger Notifikasi jika ada pengajuan baru
                                 if (currentCount > lastCount && !isFirstLoad) {
+                                    // Putar suara notifikasi
                                     let audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
                                     audio.play().catch(e => console.log('Audio play blocked'));
 
+                                    // Tampilkan SweetAlert2 dengan detail nama dan aset
                                     Swal.fire({
-                                        icon: 'info',
-                                        title: 'Permintaan Baru!',
-                                        text: 'Ada ' + (currentCount - lastCount) + ' pengajuan aset baru masuk.',
+                                        title: 'Permintaan Pinjam Baru!',
+                                        html: `
+                                            <div class="flex items-start gap-4 text-left">
+                                                <div class="bg-red-100 p-3 rounded-xl text-[#fd2800] shrink-0">
+                                                    <i class="fas fa-file-signature text-xl animate-bounce"></i>
+                                                </div>
+                                                <div class="flex-1 min-w-0">
+                                                    <p class="font-bold text-gray-900 truncate">${latestUser ?? 'Seseorang'}</p>
+                                                    <p class="text-sm text-gray-600">Ingin meminjam: <span class="font-semibold text-[#fd2800]">${latestAset ?? 'Aset'}</span></p>
+                                                    <p class="text-[10px] text-gray-400 italic mt-2">Total pengajuan pending: ${currentCount}</p>
+                                                </div>
+                                            </div>
+                                        `,
                                         toast: true,
                                         position: 'top-end',
                                         showConfirmButton: false,
-                                        timer: 5000,
+                                        timer: 3000,
                                         timerProgressBar: true,
+                                        background: '#ffffff',
+                                        customClass: {
+                                            popup: 'rounded-2xl border border-gray-100 shadow-2xl cursor-pointer hover:bg-gray-50',
+                                            timerProgressBar: 'bg-[#fd2800]'
+                                        },
                                         didOpen: (toast) => {
+                                            // Klik notifikasi langsung ke halaman persetujuan
                                             toast.addEventListener('click', () => {
                                                 window.location.href = "{{ route('admin.peminjaman.index') }}";
                                             });
@@ -81,11 +100,11 @@
                                 isFirstLoad = false;
                             })
                             .catch(function (error) {
-                                console.log('Polling error:', error);
+                                console.error('Polling error:', error);
                             });
                     }
 
-                    // Jalankan pertama kali & set interval 5 detik
+                    // Jalankan pengecekan setiap 5 detik
                     checkNewRequests();
                     setInterval(checkNewRequests, 5000);
                 });

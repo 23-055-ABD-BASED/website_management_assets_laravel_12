@@ -184,8 +184,22 @@ if ($cekPending) {
     }
     public function checkPending()
     {
+        // Mengambil jumlah total pengajuan yang statusnya pending
         $count = \App\Models\Peminjaman::where('status', 'pending')->count();
-        return response()->json(['count' => $count]);
+
+        // Mengambil data pengajuan terbaru beserta relasi pegawai dan aset
+        $latest = \App\Models\Peminjaman::with(['pegawai', 'aset'])
+                    ->where('status', 'pending')
+                    ->latest()
+                    ->first();
+
+        return response()->json([
+            'count' => $count,
+            // Pastikan 'nama_pegawai' adalah nama kolom di tabel 'pegawai' Anda
+            'latest_user' => $latest ? $latest->pegawai->nama_pegawai : null, 
+            // Pastikan 'nama_aset' adalah nama kolom di tabel 'aset' Anda
+            'latest_aset' => $latest ? $latest->aset->nama_aset : null,
+        ]);
     }
 public function returnAsset(Request $request, $id)
 {
