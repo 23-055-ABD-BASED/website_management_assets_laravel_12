@@ -729,7 +729,7 @@
                 <p id="durasiValue"
                 data-value="{{ $rataDurasiPinjam }}"
                 class="text-3xl font-black text-[#fd2800]">
-                    0 hari
+                    0
                 </p>
 
                 <p class="text-xs text-slate-400 mt-1">
@@ -863,19 +863,26 @@
     document.addEventListener('DOMContentLoaded', function () {
 
         function animateNumber(el, suffix = '', duration = 800) {
-            const target = parseFloat(el.dataset.value);
-            let start = 0;
-            const stepTime = Math.max(Math.floor(duration / target), 20);
+            const target = Number(el.dataset.value);
+
+            if (isNaN(target) || target <= 0) {
+                el.textContent = '0' + suffix;
+                return;
+            }
+
+            let current = 0;
+            const step = Math.max(1, Math.ceil(target / (duration / 16)));
 
             const counter = setInterval(() => {
-                start += 1;
-                if (start >= target) {
+                current += step;
+
+                if (current >= target) {
                     el.textContent = target + suffix;
                     clearInterval(counter);
                 } else {
-                    el.textContent = start + suffix;
+                    el.textContent = current + suffix;
                 }
-            }, stepTime);
+            }, 16);
         }
 
         // Durasi Peminjaman

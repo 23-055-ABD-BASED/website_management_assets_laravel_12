@@ -23,6 +23,7 @@ use App\Models\Peminjaman;
 
 use Carbon\Carbon;
 use App\Http\Controllers\Admin\DashboardStatistikController;
+use Illuminate\Support\Facades\DB;
 
 /*
 |--------------------------------------------------------------------------
@@ -231,8 +232,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
             ->groupBy('bulan')->orderBy('bulan')->get();
 
         // Statistik Persentase
-        $rataDurasiPinjam = round(Peminjaman::whereNotNull('tanggal_kembali_real')
-            ->selectRaw('AVG(DATEDIFF(tanggal_kembali_real, tanggal_pinjam))')->value('avg')) ?? 0;
+        $rataDurasiPinjam = (int) round(
+            Peminjaman::where('status', 'kembali')
+                ->whereNotNull('tanggal_kembali_real')
+                ->avg(DB::raw('GREATEST(DATEDIFF(tanggal_kembali_real, tanggal_pinjam), 1)')));
         
         $totalDisetujui = Peminjaman::where('status', 'disetujui')->count();
         $tingkatKeterlambatan = $totalDisetujui > 0 ? round(($peminjamanTerlambat->count() / $totalDisetujui) * 100, 1) : 0;
