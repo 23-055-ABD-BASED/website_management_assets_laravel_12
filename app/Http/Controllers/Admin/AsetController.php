@@ -5,9 +5,21 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Aset;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class AsetController extends Controller
 {
+    /**
+     * KATEGORI VALID (SATU SUMBER)
+     */
+    private array $kategoriValid = [
+        'Elektronik',
+        'Furniture',
+        'Kendaraan',
+        'Peralatan Kantor',
+        'Inventaris IT',
+    ];
+
     /**
      * =========================
      * LIST DATA ASET + FILTER
@@ -17,7 +29,6 @@ class AsetController extends Controller
     {
         $query = Aset::query();
 
-        // Search
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -26,26 +37,19 @@ class AsetController extends Controller
             });
         }
 
-        // Filter kategori
-        if ($request->filled('kategori')) {
+        if ($request->filled('kategori') && in_array($request->kategori, $this->kategoriValid)) {
             $query->where('kategori_aset', $request->kategori);
         }
 
-        // Filter status
         if ($request->filled('status')) {
             $query->where('status_aset', $request->status);
         }
 
-        // Filter kondisi
         if ($request->filled('kondisi')) {
             $query->where('kondisi_aset', $request->kondisi);
         }
 
         $aset = $query->latest()->get();
-
-        $kategoriList = Aset::select('kategori_aset')
-            ->distinct()
-            ->pluck('kategori_aset');
 
         $stats = [
             'total'    => Aset::count(),
@@ -53,7 +57,11 @@ class AsetController extends Controller
             'rusak'    => Aset::where('kondisi_aset', 'rusak')->count(),
         ];
 
-        return view('admin.aset.index', compact('aset', 'stats', 'kategoriList'));
+        return view('admin.aset.index', [
+            'aset'         => $aset,
+            'stats'        => $stats,
+            'kategoriList' => $this->kategoriValid,
+        ]);
     }
 
     /**
@@ -63,7 +71,9 @@ class AsetController extends Controller
      */
     public function create()
     {
-        return view('admin.aset.form');
+        return view('admin.aset.form', [
+            'kategoriList' => $this->kategoriValid,
+        ]);
     }
 
     /**
@@ -76,12 +86,20 @@ class AsetController extends Controller
         $request->validate([
             'kode_aset_suffix' => ['required', 'digits:4'],
             'nama_aset'        => ['required'],
-            'kategori_aset'    => ['required'],
+            'kategori_aset'    => ['required', Rule::in($this->kategoriValid)],
             'kondisi_aset'     => ['required', 'in:baik,rusak'],
             'status_aset'      => ['required', 'in:tersedia,digunakan,rusak'],
         ]);
 
-        $kodeAset = 'AST-2026-' . $request->kode_aset_suffix;
+        // 🔐 Logika bisnis: aset rusak tidak boleh tersedia
+        if ($request->kondisi_aset === 'rusak' && $request->status_aset === 'tersedia') {
+            return back()
+                ->withErrors(['status_aset' => 'Aset rusak tidak boleh berstatus tersedia.'])
+                ->withInput();
+        }
+
+        $tahun = date('Y');
+        $kodeAset = "AST-{$tahun}-{$request->kode_aset_suffix}";
 
         if (Aset::where('kode_aset', $kodeAset)->exists()) {
             return back()
@@ -115,7 +133,10 @@ class AsetController extends Controller
                 ->withErrors(['error' => 'Aset yang sedang digunakan tidak dapat diedit.']);
         }
 
-        return view('admin.aset.form', compact('aset'));
+        return view('admin.aset.form', [
+            'aset'         => $aset,
+            'kategoriList' => $this->kategoriValid,
+        ]);
     }
 
     /**
@@ -134,13 +155,19 @@ class AsetController extends Controller
         $request->validate([
             'kode_aset_suffix' => ['required', 'digits:4'],
             'nama_aset'        => ['required'],
-            'kategori_aset'    => ['required'],
+            'kategori_aset'    => ['required', Rule::in($this->kategoriValid)],
             'kondisi_aset'     => ['required', 'in:baik,rusak'],
             'status_aset'      => ['required', 'in:tersedia,digunakan,rusak'],
         ]);
 
+        if ($request->kondisi_aset === 'rusak' && $request->status_aset === 'tersedia') {
+            return back()
+                ->withErrors(['status_aset' => 'Aset rusak tidak boleh berstatus tersedia.'])
+                ->withInput();
+        }
+
         $tahun = date('Y');
-        $kodeAset = "AST-{$tahun}-" . $request->kode_aset_suffix;
+        $kodeAset = "AST-{$tahun}-{$request->kode_aset_suffix}";
 
         if (
             Aset::where('kode_aset', $kodeAset)

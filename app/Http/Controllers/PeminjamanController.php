@@ -17,19 +17,33 @@ class PeminjamanController extends Controller
     // 1. Simpan Pengajuan
     public function store(Request $request)
 {
-    $request->validate([
-        'id_aset' => 'required|exists:aset,id_aset',
-        'tanggal_pinjam' => 'required|date',
-        'tanggal_kembali' => 'required|date|after_or_equal:tanggal_pinjam',
-        'alasan' => 'required|string',
-    ]);
+    $request->validate(
+        [
+            'id_aset' => 'required|exists:aset,id_aset',
+            'tanggal_pinjam' => 'required|date',
+            'tanggal_kembali' => 'required|date|after_or_equal:tanggal_pinjam',
+            'alasan' => 'required|string',
+        ],
+        [
+            'tanggal_kembali.after_or_equal' =>
+                'Tanggal kembali tidak boleh lebih awal dari tanggal pinjam.',
+        ]
+    );
+
+    $aset = Aset::findOrFail($request->id_aset);
+
+    if ($aset->status_aset !== 'tersedia') {
+        return back()->withErrors([
+            'peminjaman' => 'Aset ini sedang tidak tersedia untuk dipinjam.'
+        ]);
+    }
 
 $pegawai = Auth::user()->pegawai;
 
 // CEK: aset ini sudah diajukan & masih pending oleh pegawai yang sama
 $cekPending = Peminjaman::where('id_pegawai', $pegawai->id_pegawai)
     ->where('id_aset', $request->id_aset)
-    ->where('status', 'menunggu')
+    ->where('status', 'pending')
     ->exists();
 
 if ($cekPending) {
@@ -72,31 +86,45 @@ if ($cekPending) {
     // 2. Admin Menyetujui Pengajuan
     public function approve($id)
     {
-        // 1. Cari data peminjaman
-        $peminjaman = Peminjaman::findOrFail($id);
-        
-        // 2. Cari data aset terkait
-        $aset = Aset::find($peminjaman->id_aset);
+        try {
+            DB::transaction(function () use ($id) {
 
-        // --- VALIDASI PENTING (Double Check) ---
-        // Cek apakah detik ini status aset masih 'tersedia'?
-        // Jika statusnya sudah 'digunakan' (karena baru saja di-approve admin untuk orang lain), maka BATALKAN.
-        if ($aset->status_aset !== 'tersedia') {
-            return back()->with('error', 'GAGAL! Aset ini sudah tidak tersedia (mungkin baru saja disetujui untuk peminjam lain).');
+                // 🔒 Lock baris agar tidak race condition
+                $peminjaman = Peminjaman::lockForUpdate()->findOrFail($id);
+                $aset = Aset::lockForUpdate()->findOrFail($peminjaman->id_aset);
+
+                // ❌ CEK ASET MASIH TERSEDIA
+                if ($aset->status_aset !== Aset::STATUS_TERSEDIA) {
+                    throw new \Exception(
+                        'Aset sudah tidak tersedia (mungkin sudah dipinjam orang lain).'
+                    );
+                }
+
+                // ❌ CEK TANGGAL SUDAH LEWAT
+                if (Carbon::parse($peminjaman->tanggal_kembali)->isPast()) {
+                    throw new \Exception(
+                        'Pengajuan ini melewati tanggal peminjaman. Mohon konfirmasi ulang.'
+                    );
+                }
+
+                // ✅ SETUJUI
+                $peminjaman->update([
+                    'status' => 'disetujui'
+                ]);
+
+                // 🔐 KUNCI ASET
+                $aset->update([
+                    'status_aset' => Aset::STATUS_DIGUNAKAN
+                ]);
+            });
+
+            return back()->with('success', 'Peminjaman berhasil disetujui.');
+
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
         }
-
-        // 3. Jika lolos validasi, baru jalankan update data
-        DB::transaction(function () use ($peminjaman, $aset) {
-            // Update status peminjaman jadi disetujui
-            $peminjaman->update(['status' => 'disetujui']);
-
-            // Update status aset jadi digunakan agar tidak bisa dipinjam lagi
-            $aset->update(['status_aset' => 'digunakan']);
-        });
-
-        return back()->with('success', 'Peminjaman disetujui. Stok aset telah dikunci.');
     }
-
+    
     // 3. Admin Menolak Pengajuan
     public function reject($id)
     {

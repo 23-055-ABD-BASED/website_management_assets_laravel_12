@@ -1,17 +1,30 @@
 <x-guest-layout>
-    <div
-        class="min-h-screen flex items-center justify-center bg-cover bg-center relative"
-        style="background-image: url('{{ asset('images/reggjo.jpg') }}');"
-    >
+<div
+    class="h-screen overflow-hidden bg-cover bg-center relative"
+    style="background-image: url('{{ asset('images/regone.jpg') }}');"
+>
+
 
         <!-- OVERLAY -->
         <div class="absolute inset-0 bg-white/50 lg:bg-white"></div>
 
         <!-- CONTENT WRAPPER -->
-        <div class="relative z-10 w-full flex items-center justify-center">
+<div class="relative z-10 w-full h-full flex items-end lg:items-center justify-center">
 
             <!-- ================= MAIN CARD ================= -->
-            <div class="w-full max-w-4xl mx-4 lg:mx-0 bg-white rounded-2xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-2">
+<div
+ class="w-full max-w-4xl
+ mx-0 lg:mx-0
+ bg-white shadow-2xl overflow-hidden
+ grid grid-cols-1 lg:grid-cols-2
+
+ /* MOBILE PANEL */
+ h-[75vh] mt-[25vh] rounded-t-3xl
+
+ /* DESKTOP */
+ lg:h-auto lg:mt-0 lg:rounded-2xl
+mobile-slide-up
+">
 
                 <!-- ========== LEFT SIDE (IMAGE + BLOBS) ========== -->
                 <div class="relative hidden lg:block overflow-hidden bg-[#171717]">
@@ -19,7 +32,7 @@
                     <!-- IMAGE -->
                     <div
                         class="absolute inset-0 bg-cover bg-center"
-                        style="background-image: url('{{ asset('images/reggjo.jpg') }}');"
+                        style="background-image: url('{{ asset('images/regone.jpg') }}');"
                     ></div>
 
                     <!-- BLOBS -->
@@ -45,7 +58,7 @@
                 </div>
 
                 <!-- ========== RIGHT SIDE (REGISTER FORM) ========== -->
-                <div class="flex items-center justify-center p-6 sm:p-8 lg:p-10">
+<div class="flex items-center justify-center h-full p-6 sm:p-8 lg:p-10">
                     <div class="w-full max-w-md">
 
                         <h2 class="text-xl sm:text-2xl font-bold text-[#171717]">
@@ -236,3 +249,19 @@ function toggleRegisterPasswords(btn) {
 }
 </script>
 
+<style>
+@media (max-width: 1023px) {
+    .mobile-slide-up {
+        animation: slideUp 0.6s ease-out forwards;
+    }
+
+    @keyframes slideUp {
+        from {
+            transform: translateY(100%);
+        }
+        to {
+            transform: translateY(0);
+        }
+    }
+}
+</style>

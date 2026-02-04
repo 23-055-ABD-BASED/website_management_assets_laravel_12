@@ -1,26 +1,58 @@
 <x-guest-layout>
-    <div class="min-h-screen flex items-center justify-center bg-white relative">
 
-        <!-- ========== BACKGROUND IMAGE (MOBILE) ========== -->
-        <div class="absolute inset-0 lg:hidden bg-cover bg-center"
-            style="background-image: url('{{ asset('images/regjjk.jpg') }}');">
-            <div class="absolute inset-0 bg-black/60"></div>
-        </div>
+    <!-- ========== MOBILE BACKGROUND ========== -->
+    <div
+        class="lg:hidden fixed inset-0 bg-cover bg-center z-0"
+        style="background-image: url('{{ asset('images/regone.jpg') }}');"
+    >
+        <div class="absolute inset-0 bg-black/60"></div>
+    </div>
+
+    <!-- ========== WRAPPER (DESKTOP TETAP CENTER) ========== -->
+    <div class="relative min-h-screen flex items-center justify-center overflow-hidden">
 
         <!-- ================= MAIN CARD ================= -->
         <div
-            class="relative z-10 w-full max-w-4xl mx-4 lg:mx-0 rounded-2xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-2 bg-white/90 backdrop-blur-lg lg:bg-white">
+            class="
+                relative z-10 w-full max-w-4xl
+
+                /* MOBILE */
+                bg-white
+                h-[60vh]
+                mt-[40vh]
+                rounded-t-3xl
+
+                /* DESKTOP (ASLI, JANGAN DIUBAH) */
+                lg:h-auto
+                lg:mt-0
+                lg:rounded-2xl
+                lg:shadow-2xl
+                lg:bg-white
+
+                overflow-hidden
+                grid grid-cols-1 lg:grid-cols-2
+
+                mobile-slide-up
+            "
+        >
 
             <!-- ========== LEFT SIDE (IMAGE DESKTOP) ========== -->
             <div class="relative hidden lg:block overflow-hidden bg-[#171717]">
                 <div
                     class="absolute inset-0 bg-cover bg-center"
-                    style="background-image: url('{{ asset('images/regjjk.jpg') }}');"
+                    style="background-image: url('{{ asset('images/regone.jpg') }}');"
                 ></div>
             </div>
 
             <!-- ========== RIGHT SIDE (FORM) ========== -->
-            <div class="flex items-center justify-center p-6 sm:p-8 lg:p-10">
+            <div
+                class="
+                    flex items-center justify-center
+                    h-full
+                    px-6 py-8
+                    lg:p-10
+                "
+            >
                 <div class="w-full max-w-md">
 
                     <h2 class="text-xl sm:text-2xl font-bold text-[#171717]">
@@ -39,7 +71,7 @@
 
                         <!-- EMAIL -->
                         <div>
-                            <x-input-label for="email" value="Email" class="text-[#444444]" />
+                            <x-input-label for="email" value="Email" />
                             <x-text-input
                                 id="email"
                                 name="email"
@@ -48,14 +80,14 @@
                                 required
                                 autofocus
                                 placeholder="@gmail.com"
-                                class="mt-1 w-full rounded-lg border-gray-300 focus:border-[#fd2800] focus:ring-[#fd2800]"
+                                class="mt-1 w-full rounded-xl"
                             />
                             <x-input-error :messages="$errors->get('email')" class="mt-2" />
                         </div>
 
                         <!-- PASSWORD -->
                         <div>
-                            <x-input-label for="password" value="New Password" class="text-[#444444]" />
+                            <x-input-label for="password" value="New Password" />
 
                             <div class="relative">
                                 <x-text-input
@@ -64,10 +96,9 @@
                                     type="password"
                                     required
                                     placeholder="New Password"
-                                    class="mt-1 w-full rounded-lg border-gray-300 focus:border-[#fd2800] focus:ring-[#fd2800] pr-10"
+                                    class="mt-1 w-full rounded-xl pr-10"
                                 />
 
-                                <!-- ICON MATA -->
                                 <button
                                     type="button"
                                     onclick="toggleResetPassword(this)"
@@ -83,18 +114,16 @@
 
                         <!-- CONFIRM PASSWORD -->
                         <div>
-                            <x-input-label for="password_confirmation" value="Confirm Password" class="text-[#444444]" />
+                            <x-input-label for="password_confirmation" value="Confirm Password" />
 
-                            <div class="relative">
-                                <x-text-input
-                                    id="reset_password_confirmation"
-                                    name="password_confirmation"
-                                    type="password"
-                                    required
-                                    placeholder="Confirm Password"
-                                    class="mt-1 w-full rounded-lg border-gray-300 focus:border-[#fd2800] focus:ring-[#fd2800] pr-10"
-                                />
-                            </div>
+                            <x-text-input
+                                id="reset_password_confirmation"
+                                name="password_confirmation"
+                                type="password"
+                                required
+                                placeholder="Confirm Password"
+                                class="mt-1 w-full rounded-xl"
+                            />
 
                             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
                         </div>
@@ -102,14 +131,14 @@
                         <!-- SUBMIT -->
                         <button
                             type="submit"
-                            class="w-full py-3 rounded-lg bg-[#fd2800] text-white font-semibold hover:opacity-90 transition"
+                            class="w-full py-3 rounded-xl bg-[#fd2800] text-white font-semibold"
                         >
                             Reset Password
                         </button>
 
-                        <!-- BACK TO LOGIN -->
+                        <!-- BACK -->
                         <div class="text-center text-sm text-[#444444]">
-                            <a href="{{ route('login') }}" class="text-[#fd2800] hover:underline">
+                            <a href="{{ route('login') }}" class="text-[#fd2800] font-semibold">
                                 Kembali ke Login
                             </a>
                         </div>
@@ -141,3 +170,20 @@ function toggleResetPassword(btn) {
     eyeClosed.classList.toggle("hidden", !isHidden);
 }
 </script>
+
+<style>
+@media (max-width: 1023px) {
+    .mobile-slide-up {
+        animation: slideUp 0.6s ease-out forwards;
+    }
+
+    @keyframes slideUp {
+        from {
+            transform: translateY(100%);
+        }
+        to {
+            transform: translateY(0);
+        }
+    }
+}
+</style>
