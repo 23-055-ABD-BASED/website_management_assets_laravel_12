@@ -13,12 +13,9 @@
             
             <div class="flex items-center gap-8">
                 <a href="{{ $isAdmin ? route('admin.dashboard') : route('dashboard') }}" 
-                   class="flex items-center gap-3">
-                    <div class="p-1.5 bg-[#fd2800] rounded-lg">
-                        <x-application-logo class="h-6 w-auto text-white fill-current"/>
-                    </div>
-                    <span class="hidden lg:block text-white font-bold tracking-tight text-lg">
-                        ASSET<span class="text-[#fd2800]">SYSTEM</span>
+                class="flex items-center gap-3">
+                    <span class="text-white font-bold tracking-tight text-lg">
+                        ASE<span class="text-[#fd2800]">TU</span>
                     </span>
                 </a>
 

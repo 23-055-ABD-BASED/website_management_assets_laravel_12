@@ -335,7 +335,7 @@
                                 </div>
                                 <div>
                                     <label class="text-xs font-bold text-[#171717] uppercase tracking-wide font-heading block mb-1">Tahun</label>
-                                    <select name="tahun" id="tahun" class="block w-full rounded-lg border-[#ededed] bg-white text-sm text-[#444444] focus:border-[#fd2800] focus:ring-[#fd2800] py-2 px-3">
+                                    <select name="tahun" id="tahun" class="block w-full rounded-lg border-[#ededed] bg-white text-sm text-[#444444] focus:border-[#fd2800] focus:ring-[#fd2800] py-2 pr-8 px-3">
                                         @foreach($tahunList as $tahun)
                                             <option value="{{ $tahun }}">{{ $tahun }}</option>
                                         @endforeach
