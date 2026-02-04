@@ -56,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 console.log('Submitting login form to:', loginForm.action);
                 const response = await fetch(loginForm.action, {
                     method: "POST",
-                    credentials: "include", // 🔥 UBAH dari same-origin ke include
+                    credentials: "include", // UBAH dari same-origin ke include
                     headers: {
                         "X-Requested-With": "XMLHttpRequest",
                         "Accept": "application/json",
@@ -117,7 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const confirm  = registerForm.querySelector('input[name="password_confirmation"]');
         const errorMsg = document.getElementById('password-error');
 
-        // 🔴 VALIDASI PASSWORD DULU
+        // VALIDASI PASSWORD DULU
         if (password.value !== confirm.value) {
             errorMsg.classList.remove('hidden');
             return; // ⛔ STOP DI SINI (tidak kirim ke backend)

@@ -52,7 +52,7 @@ if ($cekPending) {
     ]);
 }
 
-    // 🔴 CEK DUPLIKAT PENGAJUAN (PENDING)
+    // CEK DUPLIKAT PENGAJUAN (PENDING)
     $sudahPending = Peminjaman::where('id_pegawai', $pegawai->id_pegawai)
         ->where('id_aset', $request->id_aset)
         ->where('status', 'pending')
@@ -233,7 +233,7 @@ public function returnAsset(Request $request, $id)
             ]);
         }
 
-        // 5️⃣ UPDATE DATA PEMINJAMAN (INI BAGIAN BARU 🔥)
+        // UPDATE DATA PEMINJAMAN (INI BAGIAN BARU)
         $peminjaman->update([
             'status' => 'kembali',
             'tanggal_kembali_real' => $tanggalReal,

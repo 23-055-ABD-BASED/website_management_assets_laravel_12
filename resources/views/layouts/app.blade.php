@@ -143,6 +143,135 @@
             </script>
         @endif
 
+        @if(auth()->check())
+        <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let lastChatId = null;
+            let isFirstLoad = true;
+
+            const chatDot   = document.getElementById('chat-dot');
+            const chatSound = new Audio("{{ asset('sounds/chat.mp3') }}");
+
+            function pollMessages() {
+                // Jangan munculkan notif kalau sedang di halaman chat
+                if (window.location.pathname.includes('/chat')) return;
+
+                axios.get('{{ route("chat.check.new") }}')
+                    .then(response => {
+                        const data = response.data;
+
+                        if (!data.new_message) {
+                            isFirstLoad = false;
+                            return;
+                        }
+                        if (chatDot) chatDot.classList.remove('hidden');
+
+                        if (data.message_id === lastChatId || isFirstLoad) {
+                            lastChatId = data.message_id;
+                            isFirstLoad = false;
+                            return;
+                        }
+
+                        lastChatId = data.message_id;
+                        isFirstLoad = false;
+
+                        chatSound.currentTime = 0;
+                        chatSound.volume = 0.6;
+                        chatSound.play().catch(() => {});
+
+                        const initial = data.sender_name
+                            ? data.sender_name.substring(0, 1).toUpperCase()
+                            : '?';
+
+                        // SweetAlert Toast (WA-like)
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            showConfirmButton: false,
+                            timer: 1200,
+                            timerProgressBar: true,
+                            background: '#ffffff',
+                            padding: '0.75rem 1rem',
+                            customClass: {
+                                popup: 'wa-toast'
+                            },
+                            html: `
+                                <div class="flex items-start gap-3">
+                                    <div class="w-10 h-10 rounded-full bg-[#fd2800] text-white flex items-center justify-center font-bold">
+                                        ${initial}
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <div class="font-bold text-sm text-slate-900">
+                                            ${data.sender_name}
+                                        </div>
+                                        <div class="text-sm text-slate-500 truncate">
+                                            ${data.message_text}
+                                        </div>
+                                    </div>
+                                </div>
+                            `,
+                            didOpen: (toast) => {
+                                toast.style.cursor = 'pointer';
+                                toast.addEventListener('click', () => {
+                                    window.location.href =
+                                        "{{ auth()->user()->role === 'admin'
+                                            ? route('admin.chat.index')
+                                            : route('chat.index') }}";
+                                });
+                            }
+                        });
+                    })
+                    .catch(err => console.error('Polling error:', err));
+            }
+
+            setInterval(pollMessages, 4000);
+            pollMessages();
+        });
+        </script>
+
+        <style>
+        /* Animasi & feel WhatsApp */
+        .wa-toast {
+            border-radius: 14px !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,.15) !important;
+            animation: wa-slide-in .35s ease-out;
+        }
+
+        @keyframes wa-slide-in {
+            from {
+                transform: translateX(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        </style>
+        @endif
+
+
+<script>
+(function () {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    if (!localStorage.getItem('user_timezone')) {
+        fetch('/set-timezone', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ timezone })
+        }).then(() => {
+            localStorage.setItem('user_timezone', timezone);
+        });
+    }
+})();
+</script>
+
+
+
         {{-- ======================================================= --}}
         {{-- 3. LIVEWIRE CONFIG (MANUAL BUNDLING)                    --}}
         {{-- ======================================================= --}}

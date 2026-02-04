@@ -8,6 +8,7 @@ use App\Models\Pegawai;
 use App\Models\Aset;
 use App\Models\Peminjaman;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DashboardStatistikController extends Controller
 {
@@ -46,12 +47,40 @@ class DashboardStatistikController extends Controller
         // ===============================
         // DATA TAMBAHAN DASHBOARD
         // ===============================
-        $peminjamanBulanan = Peminjaman::selectRaw('MONTH(created_at) as bulan')
+        // Ambil tahun dari dropdown (boleh null)
+        $tahunAktif = request('tahun');
+
+        // Kalau belum pilih tahun → ambil tahun terbaru dari data
+        if (!$tahunAktif) {
+            $tahunAktif = Peminjaman::whereNotNull('tanggal_pinjam')
+                ->max(DB::raw('YEAR(tanggal_pinjam)'))
+                ?? now()->year;
+        }
+
+        // Query peminjaman per bulan
+        $peminjamanBulanan = Peminjaman::selectRaw('MONTH(tanggal_pinjam) as bulan')
             ->selectRaw('COUNT(*) as total')
-            ->whereYear('created_at', now()->year)
-            ->groupBy('bulan')
-            ->orderBy('bulan')
+            ->whereYear('tanggal_pinjam', $tahunAktif)
+            ->groupByRaw('MONTH(tanggal_pinjam)')
+            ->orderByRaw('MONTH(tanggal_pinjam)')
             ->get();
+
+        // Lengkapi 12 bulan
+        $bulanLengkap = collect(range(1, 12))->map(function ($bulan) use ($peminjamanBulanan) {
+            $data = $peminjamanBulanan->firstWhere('bulan', $bulan);
+
+            return (object) [
+                'bulan' => $bulan,
+                'total' => $data->total ?? 0,
+            ];
+        });
+
+        // Daftar tahun dropdown
+        $daftarTahun = Peminjaman::selectRaw('YEAR(tanggal_pinjam) as tahun')
+            ->whereNotNull('tanggal_pinjam')
+            ->distinct()
+            ->orderByDesc('tahun')
+            ->pluck('tahun');
 
         $topPeminjam = Peminjaman::select('id_pegawai')
             ->selectRaw('COUNT(*) as total')
@@ -127,7 +156,6 @@ class DashboardStatistikController extends Controller
             'total',
             'growth',
             'stats',
-            'peminjamanBulanan',
             'topPeminjam',
             'peminjamanTrend',
             'assetHealth',
@@ -140,7 +168,10 @@ class DashboardStatistikController extends Controller
             'stokKategori',
             'incomingRequests',
             'peminjamanTerlambat',
-            'users'
+            'users',
+            'bulanLengkap',
+            'daftarTahun',
+            'tahunAktif'
         ));
     }
 

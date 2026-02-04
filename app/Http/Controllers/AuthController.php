@@ -10,7 +10,7 @@ class AuthController extends Controller
     public function login(Request $request)
     {
 
-        // 🔒 JIKA INI REQUEST REGISTER → STOP
+        // JIKA INI REQUEST REGISTER → STOP
         if ($request->has('register')) {
             return back();
         }
@@ -29,7 +29,7 @@ class AuthController extends Controller
             ], 422);
         }
 
-        // 🔥 KRUSIAL
+        // KRUSIAL
         $request->session()->regenerate();
 
         $user = Auth::user();
@@ -78,6 +78,6 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login');
+        return redirect()->route('welcome');
     }
 }

@@ -1,188 +1,150 @@
-<nav x-data="{ open: false }" class="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
+@php
+    use App\Models\Peminjaman;
+
+    $isAdmin = Auth::user()->role === 'admin';
+    $pendingCount = $isAdmin
+        ? Peminjaman::where('status', 'pending')->count()
+        : 0;
+@endphp
+
+<nav x-data="{ open: false }" class="sticky top-0 z-50 bg-[#171717] border-b border-[#444444]">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center h-16">
-
+        <div class="flex h-16 items-center justify-between">
+            
             <div class="flex items-center gap-8">
-                <div class="shrink-0 flex items-center">
-                    <a href="{{ Auth::user()->role === 'admin' ? route('admin.dashboard') : route('dashboard') }}" class="transition transform hover:scale-105">
-                        <x-application-logo class="block h-9 w-auto fill-current text-blue-600" />
-                    </a>
-                </div>
+                <a href="{{ $isAdmin ? route('admin.dashboard') : route('dashboard') }}" 
+                class="flex items-center gap-3">
+                    <span class="text-white font-bold tracking-tight text-lg">
+                        ASE<span class="text-[#fd2800]">TU</span>
+                    </span>
+                </a>
 
-                <div class="hidden space-x-8 sm:flex">
-                    
-                    @if(Auth::user()->role === 'admin')
-                        {{-- ======================= --}}
-                        {{-- MENU ADMIN --}}
-                        {{-- ======================= --}}
-                        <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')" 
-                            class="text-sm font-medium transition-colors duration-200 hover:text-blue-600">
-                            {{ __('Dashboard') }}
-                        </x-nav-link>
+                <div class="hidden md:flex items-center gap-1">
+                    @php
+                        $links = $isAdmin ? [
+                            ['route' => 'admin.dashboard', 'label' => 'Dashboard', 'active' => 'admin.dashboard'],
+                            ['route' => 'pegawai.index', 'label' => 'Pegawai', 'active' => 'pegawai.*'],
+                            ['route' => 'admin.aset.index', 'label' => 'Data Aset', 'active' => 'admin.aset.*'],
+                            ['route' => 'admin.peminjaman.index', 'label' => 'Permintaan', 'active' => 'admin.peminjaman.*', 'count' => $pendingCount],
+                            ['route' => 'admin.chat.index', 'label' => 'Live Chat', 'active' => 'admin.chat.index', 'isChat' => true],
+                        ] : [
+                            ['route' => 'dashboard', 'label' => 'Dashboard', 'active' => 'dashboard'],
+                            ['route' => 'peminjaman.index', 'label' => 'Riwayat', 'active' => 'peminjaman.index'],
+                            ['route' => 'chat.index', 'label' => 'Chat Bantuan', 'active' => 'chat.index', 'isChat' => true],
+                        ];
+                    @endphp
 
-                        <x-nav-link :href="route('pegawai.index')" :active="request()->routeIs('pegawai.*')" 
-                            class="text-sm font-medium transition-colors duration-200 hover:text-blue-600">
-                            {{ __('Pegawai') }}
-                        </x-nav-link>
-
-                        <x-nav-link :href="route('admin.aset.index')" :active="request()->routeIs('admin.aset.*')" 
-                            class="text-sm font-medium transition-colors duration-200 hover:text-blue-600">
-                            {{ __('Data Aset') }}
-                        </x-nav-link>
-
-                        <x-nav-link :href="route('admin.peminjaman.index')" :active="request()->routeIs('admin.peminjaman.*')" 
-                            class="text-sm font-medium transition-colors duration-200 hover:text-blue-600">
-                            {{ __('Permintaan Masuk') }}
-                            @php
-                                $pendingCount = \App\Models\Peminjaman::where('status', 'pending')->count();
-                            @endphp
-                            @if($pendingCount > 0)
-                                <span id="pending-badge" class="ml-2 inline-flex items-center rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-800">
-                                    {{ $pendingCount }}
+                    @foreach($links as $link)
+                        <a href="{{ route($link['route']) }}" 
+                           class="relative px-4 py-2 text-sm font-medium transition-colors rounded-md {{ request()->routeIs($link['active']) ? 'text-white' : 'text-gray-400 hover:text-white hover:bg-[#444444]/50' }}">
+                            {{ $link['label'] }}
+                            @if(isset($link['count']) && $link['count'] > 0)
+                                <span class="ml-2 inline-flex items-center justify-center px-1.5 py-0.5 text-[10px] font-bold leading-none text-white bg-[#fd2800] rounded-full">
+                                    {{ $link['count'] }}
                                 </span>
                             @endif
-                        </x-nav-link>
-
-                        {{-- [BARU] LIVE CHAT ADMIN --}}
-                        <x-nav-link :href="route('admin.chat.index')" :active="request()->routeIs('admin.chat.index')" 
-                            class="text-sm font-medium transition-colors duration-200 hover:text-[#fd2800] text-[#fd2800]">
-                            {{ __('Live Chat') }}
-                        </x-nav-link>
-
-                    @else
-                        {{-- ======================= --}}
-                        {{-- MENU USER BIASA --}}
-                        {{-- ======================= --}}
-                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" 
-                            class="text-sm font-medium transition-colors duration-200 hover:text-blue-600">
-                            {{ __('Dashboard') }}
-                        </x-nav-link>
-                        
-                        <x-nav-link :href="route('peminjaman.index')" :active="request()->routeIs('peminjaman.index')" 
-                            class="text-sm font-medium transition-colors duration-200 hover:text-blue-600">
-                            {{ __('Riwayat Saya') }}
-                        </x-nav-link>
-
-                        <x-nav-link
-                            :href="route('chat.support')"
-                            :active="request()->routeIs('chat.support')"
-                            class="text-sm font-medium transition-colors duration-200
-                                hover:text-[#fd2800] text-[#fd2800]">
-                            {{ __('Chat Bantuan') }}
-                        </x-nav-link>
-                    @endif
-
+                            @if(isset($link['isChat']))
+                                <span id="chat-dot" class="hidden absolute top-2 right-2 h-2 w-2 rounded-full bg-[#fd2800] animate-pulse"></span>
+                            @endif
+                        </a>
+                    @endforeach
                 </div>
             </div>
 
-            <div class="hidden sm:flex sm:items-center sm:gap-4">
-                <x-dropdown align="right" width="48">
-                    <x-slot name="trigger">
-                        <button class="flex items-center gap-3 pl-3 pr-2 py-1.5 border border-transparent text-sm leading-4 font-medium rounded-full text-gray-500 bg-gray-50 hover:bg-gray-100 hover:text-gray-700 focus:outline-none transition ease-in-out duration-150 ring-1 ring-gray-200">
-                            <div class="text-right hidden md:block">
-                                <div class="text-gray-700 font-bold">{{ Auth::user()->username }}</div>
-                                <div class="text-xs text-gray-400 font-normal uppercase tracking-wider">{{ Auth::user()->role ?? 'User' }}</div>
-                            </div>
-                            <div class="h-8 w-8 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold shadow-sm">
-                                {{ substr(Auth::user()->username, 0, 1) }}
-                            </div>
-                            <svg class="h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
-                            </svg>
-                        </button>
-                    </x-slot>
+            <div class="hidden md:flex items-center gap-6">
+                <div class="flex items-center gap-3">
+                    <div class="text-right">
+                        <p class="text-sm font-semibold text-white leading-none mb-1">{{ Auth::user()->username }}</p>
+                        <p class="text-[10px] font-bold text-[#fd2800] uppercase tracking-widest">{{ Auth::user()->role }}</p>
+                    </div>
+                    <div class="h-9 w-9 rounded-full bg-[#444444] border border-gray-600 flex items-center justify-center text-white font-bold text-sm">
+                        {{ strtoupper(substr(Auth::user()->username, 0, 1)) }}
+                    </div>
+                </div>
 
-                    <x-slot name="content">
-                        <x-dropdown-link :href="route('profile.edit')" class="flex items-center gap-2">
-                            {{ __('Profile') }}
-                        </x-dropdown-link>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <x-dropdown-link :href="route('logout')" class="flex items-center gap-2 text-red-600"
-                                    onclick="event.preventDefault(); this.closest('form').submit();">
-                                {{ __('Log Out') }}
-                            </x-dropdown-link>
-                        </form>
-                    </x-slot>
-                </x-dropdown>
+                <form method="POST" action="{{ route('logout') }}" class="m-0">
+                    @csrf
+                    <button class="px-3 py-2 text-sm font-medium text-gray-400 hover:text-[#fd2800] transition-colors">
+                        Logout
+                    </button>
+                </form>
             </div>
 
-            <div class="-me-2 flex items-center sm:hidden">
-                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none transition duration-150 ease-in-out">
-                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{ 'hidden': open, 'inline-flex': !open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        <path :class="{ 'hidden': !open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
+            <button @click="open = true" class="md:hidden p-2 text-gray-400 hover:text-white transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
         </div>
     </div>
 
-    {{-- MOBILE MENU --}}
-    <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden bg-white border-t border-gray-100">
-        <div class="pt-2 pb-3 space-y-1">
+    <div x-show="open" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-[100] md:hidden" 
+         style="display: none;">
+        
+        <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" @click="open = false"></div>
+
+        <div x-show="open" 
+             x-transition:enter="transition ease-in-out duration-300 transform" 
+             x-transition:enter-start="translate-x-full" 
+             x-transition:enter-end="translate-x-0" 
+             x-transition:leave="transition ease-in-out duration-300 transform" 
+             x-transition:leave-start="translate-x-0" 
+             x-transition:leave-end="translate-x-full" 
+             class="fixed inset-y-0 right-0 w-[280px] bg-[#444444] shadow-2xl flex flex-col z-[110]">
             
-            @if(Auth::user()->role === 'admin')
-                <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
-                    {{ __('Dashboard') }}
-                </x-responsive-nav-link>
-                
-                <x-responsive-nav-link :href="route('pegawai.index')" :active="request()->routeIs('pegawai.*')">
-                    {{ __('Pegawai') }}
-                </x-responsive-nav-link>
-
-                <x-responsive-nav-link :href="route('admin.aset.index')" :active="request()->routeIs('admin.aset.*')">
-                    {{ __('Data Aset') }}
-                </x-responsive-nav-link>
-
-                <x-responsive-nav-link :href="route('admin.peminjaman.index')" :active="request()->routeIs('admin.peminjaman.*')">
-                    {{ __('Permintaan Masuk') }}
-                </x-responsive-nav-link>
-
-                {{-- [BARU] LIVE CHAT MOBILE --}}
-                <x-responsive-nav-link :href="route('admin.chat.index')" :active="request()->routeIs('admin.chat.index')" class="text-[#fd2800]">
-                    {{ __('Live Chat') }}
-                </x-responsive-nav-link>
-
-            @else
-                <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                    {{ __('Dashboard') }}
-                </x-responsive-nav-link>
-                 <x-responsive-nav-link :href="route('peminjaman.index')" :active="request()->routeIs('peminjaman.index')">
-                    {{ __('Riwayat Saya') }}
-                </x-responsive-nav-link>
-
-                <x-responsive-nav-link :href="route('chat.support')" :active="request()->routeIs('chat.support')" class="text-[#fd2800]">
-                    {{ __('Chat Bantuan') }}
-                </x-responsive-nav-link>
-            @endif
-
-        </div>
-
-        <div class="pt-4 pb-1 border-t border-gray-200 bg-gray-50">
-            <div class="px-4 flex items-center gap-3">
-                <div class="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold text-lg">
-                    {{ substr(Auth::user()->username, 0, 1) }}
-                </div>
-                <div>
-                    <div class="font-medium text-base text-gray-800">{{ Auth::user()->username }}</div>
-                    <div class="font-medium text-sm text-gray-500">{{ ucfirst(Auth::user()->role) }}</div>
-                </div>
+            <div class="flex items-center justify-between px-6 h-16 bg-[#171717] border-b border-[#444444]">
+                <span class="text-white font-bold tracking-widest text-sm uppercase">Navigation</span>
+                <button @click="open = false" class="text-gray-400 hover:text-white p-1">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
 
-            <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile.edit')">
-                    {{ __('Profile') }}
-                </x-responsive-nav-link>
+            <div class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+                @foreach($links as $link)
+                    <a href="{{ route($link['route']) }}" 
+                       class="flex items-center justify-between px-4 py-3 rounded-lg text-sm font-medium transition-all {{ request()->routeIs($link['active']) ? 'bg-[#fd2800] text-white shadow-lg' : 'text-gray-200 hover:bg-[#171717] hover:text-white' }}">
+                        {{ $link['label'] }}
+                        @if(isset($link['count']) && $link['count'] > 0)
+                            <span class="bg-white text-[#fd2800] px-2 py-0.5 rounded-full text-[10px] font-bold">{{ $link['count'] }}</span>
+                        @endif
+                    </a>
+                @endforeach
+            </div>
 
-                <form method="POST" action="{{ route('logout') }}">
+            <div class="p-4 bg-[#171717] border-t border-[#444444]">
+                <div class="flex items-center gap-3 mb-4 px-2">
+                    <div class="h-10 w-10 rounded-full bg-[#444444] flex items-center justify-center text-white font-bold border border-[#fd2800]">
+                        {{ strtoupper(substr(Auth::user()->username, 0, 1)) }}
+                    </div>
+                    <div class="overflow-hidden">
+                        <p class="text-white font-semibold text-sm truncate">{{ Auth::user()->username }}</p>
+                        <p class="text-[10px] text-[#fd2800] font-bold uppercase tracking-tighter">{{ Auth::user()->role }}</p>
+                    </div>
+                </div>
+                <form method="POST" action="{{ route('logout') }}" class="m-0">
                     @csrf
-                    <x-responsive-nav-link :href="route('logout')" class="text-red-600"
-                            onclick="event.preventDefault(); this.closest('form').submit();">
-                        {{ __('Log Out') }}
-                    </x-responsive-nav-link>
+                    <button class="w-full py-3 bg-[#fd2800] hover:bg-[#e02400] text-white rounded-lg text-sm font-bold transition-all shadow-md">
+                        LOGOUT SYSTEM
+                    </button>
                 </form>
             </div>
         </div>
     </div>
 </nav>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    if (location.pathname.includes('/chat')) {
+        document.querySelectorAll('#chat-dot').forEach(el => el.classList.add('hidden'));
+    }
+});
+</script>
