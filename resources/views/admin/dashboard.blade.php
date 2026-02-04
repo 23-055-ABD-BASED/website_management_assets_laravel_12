@@ -525,42 +525,72 @@
         {{-- GRID ATAS --}}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-            {{-- ================= PEMINJAMAN BULANAN --}}
+            {{-- ================= PEMINJAMAN BULANAN ================= --}}
             <div class="rounded-xl border border-slate-100 p-5 hover:shadow-sm transition">
-                <h4 class="text-sm font-bold text-slate-700 mb-5 flex items-center gap-2">
-                    📈 Jumlah Pinjaman Bulanan
-                </h4>
 
-                @if($peminjamanBulanan->isEmpty())
-                    <p class="text-xs text-slate-400 italic">
-                        Belum ada data peminjaman tahun ini
-                    </p>
-                @else
-                    <div class="space-y-4">
-                        @foreach($peminjamanBulanan as $row)
-                            @php
-                                $max = max($peminjamanBulanan->max('total'), 1);
-                                $persen = round(($row->total / $max) * 100);
-                            @endphp
-                            <div>
-                                <div class="flex justify-between text-xs mb-1">
-                                    <span class="font-semibold text-slate-600">
-                                        {{ \Carbon\Carbon::create()->month($row->bulan)->isoFormat('MMM') }}
-                                    </span>
-                                    <span class="font-mono text-slate-400">
-                                        {{ $row->total }}
-                                    </span>
-                                </div>
-                                <div class="w-full bg-slate-100 rounded-full h-2">
-                                    <div
-                                        class="h-2 rounded-full bg-gradient-to-r from-[#fd2800] to-[#ff6b3d]"
-                                        style="width: {{ $persen }}%">
-                                    </div>
+                {{-- Header --}}
+                <div class="flex justify-between items-center mb-4">
+                    <h4 class="text-sm font-bold text-slate-700 flex items-center gap-2">
+                        📈 Jumlah Pinjaman Bulanan
+                    </h4>
+
+                    <form method="GET">
+                        <select name="tahun"
+                            onchange="this.form.submit()"
+                            class="text-xs border border-slate-200 rounded-lg px-3 pr-8 py-1.5
+                                text-slate-600 focus:outline-none focus:ring-1
+                                focus:ring-orange-300 bg-white">
+                            @foreach($daftarTahun as $tahun)
+                                <option value="{{ $tahun }}"
+                                    {{ $tahun == $tahunAktif ? 'selected' : '' }}>
+                                    {{ $tahun }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </form>
+                </div>
+
+                {{-- Body (scroll area) --}}
+                <div class="space-y-4 max-h-[260px] overflow-y-auto pr-2">
+
+                    @php
+                        $max = max($bulanLengkap->max('total'), 1);
+                    @endphp
+
+                    @foreach($bulanLengkap as $row)
+                        @php
+                            $persen = round(($row->total / $max) * 100);
+                        @endphp
+
+                        <div>
+                            <div class="flex justify-between text-xs mb-1">
+                                <span class="font-semibold text-slate-600">
+                                    {{ \Carbon\Carbon::create()->month($row->bulan)->isoFormat('MMM') }}
+                                </span>
+                                <span class="font-mono text-slate-400">
+                                    {{ $row->total }}
+                                </span>
+                            </div>
+
+                            <div class="w-full bg-slate-100 rounded-full h-2">
+                                <div
+                                    class="h-2 rounded-full bg-gradient-to-r
+                                        from-[#fd2800] to-[#ff6b3d]
+                                        transition-all duration-500"
+                                    style="width: {{ $persen }}%">
                                 </div>
                             </div>
-                        @endforeach
-                    </div>
-                @endif
+                        </div>
+                    @endforeach
+                </div>
+
+                {{-- Footer --}}
+                <div class="mt-4 text-xs text-slate-400">
+                    Total peminjaman tahun {{ $tahunAktif }}:
+                    <span class="font-semibold text-slate-600">
+                        {{ $bulanLengkap->sum('total') }}
+                    </span>
+                </div>
             </div>
 
             {{-- ================= TOP PEMINJAM --}}
