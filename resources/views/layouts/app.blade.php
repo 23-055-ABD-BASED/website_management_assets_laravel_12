@@ -295,10 +295,11 @@
         {{-- 3. LIVEWIRE CONFIG (MANUAL BUNDLING)                    --}}
         {{-- ======================================================= --}}
         @livewireScriptConfig
+         </body>
 
-        {{-- ======================================================= --}}
-        {{-- 4. PAGE SPECIFIC SCRIPTS (Chart.js, Dashboard, dll)     --}}
-        {{-- ======================================================= --}}
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
         @stack('scripts')
+        
     </body>
 </html>
