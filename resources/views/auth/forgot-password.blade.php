@@ -74,7 +74,6 @@
                                 name="email"
                                 type="email"
                                 required
-                                autofocus
                                 placeholder="@gmail.com"
                                 class="mt-1 w-full rounded-xl"
                             />

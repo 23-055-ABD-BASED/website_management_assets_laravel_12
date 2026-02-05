@@ -12,10 +12,7 @@
                     </div>
 
                     {{-- Time Widget --}}
-                   <div class="flex items-center gap-3">
-                        {{-- 1. BAGIAN JAM (TEXT) --}}
-                        {{-- Ubah: order-2 (mobile/tab kanan), lg:order-1 (desktop kiri) --}}
-                        {{-- Ubah: items-start (mobile/tab rata kiri), lg:items-end (desktop rata kanan) --}}
+                   <div class="flex items-center gap-3">               
                         <div x-data="{
                                 time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }).replace('.', ':'),
                                 init() {
@@ -24,8 +21,7 @@
                                     }, 1000);
                                 }
                             }" 
-                            class="flex flex-col order-2 lg:order-1 items-start lg:items-end"> 
-                            
+                            class="flex flex-col order-2 lg:order-1 items-start lg:items-end">                            
                             <span class="text-2xl font-bold text-[#171717] font-mono leading-none" x-text="time"></span>
                             <span class="text-xs text-slate-400 font-medium text-left lg:text-right">
                                 {{ \Carbon\Carbon::now()->isoFormat('dddd, D MMMM Y') }}
@@ -33,7 +29,6 @@
                         </div>
 
                         {{-- 2. BAGIAN ICON --}}
-                        {{-- Ubah: order-1 (mobile/tab kiri), lg:order-2 (desktop kanan) --}}
                         <div class="order-1 lg:order-2 p-3 bg-white rounded-xl shadow-sm border border-slate-200">
                             <svg class="w-6 h-6 text-[#fd2800]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />

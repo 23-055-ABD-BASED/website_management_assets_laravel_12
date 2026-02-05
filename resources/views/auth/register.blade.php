@@ -80,7 +80,6 @@ mobile-slide-up
                                     type="text"
                                     :value="old('username')"
                                     required
-                                    autofocus
                                     placeholder="Username"
                                     class="mt-1 w-full rounded-lg border-gray-300 focus:border-[#fd2800] focus:ring-[#fd2800]"
                                 />

@@ -70,7 +70,6 @@
                                 name="login"
                                 type="text"
                                 required
-                                autofocus
                                 placeholder="username atau email"
                                 class="mt-1 w-full rounded-xl"
                             />
