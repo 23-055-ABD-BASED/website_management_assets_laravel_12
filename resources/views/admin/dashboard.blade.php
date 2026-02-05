@@ -902,3 +902,29 @@
     @endpush
 
 </x-app-layout>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('Script Check: Manual Placement');
+        
+        @if(isset($peminjamanTerlambat) && $peminjamanTerlambat->count() > 0)
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'warning',
+                title: 'Peringatan Jatuh Tempo!',
+                text: 'Ada {{ $peminjamanTerlambat->count() }} peminjaman yang melewati batas waktu.',
+                showConfirmButton: false,
+                timer: 8000,
+                timerProgressBar: true,
+                iconColor: '#fd2800',
+                background: '#1c1c1c',
+                color: '#ffffff',
+                customClass: {
+                    popup: 'rounded-2xl border border-white/10 shadow-2xl'
+                }
+            });
+        @endif
+    });
+</script>
