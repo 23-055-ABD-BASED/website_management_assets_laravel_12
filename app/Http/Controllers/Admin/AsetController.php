@@ -91,7 +91,7 @@ class AsetController extends Controller
             'status_aset'      => ['required', 'in:tersedia,digunakan,rusak'],
         ]);
 
-        // 🔐 Logika bisnis: aset rusak tidak boleh tersedia
+        // Logika bisnis: aset rusak tidak boleh tersedia
         if ($request->kondisi_aset === 'rusak' && $request->status_aset === 'tersedia') {
             return back()
                 ->withErrors(['status_aset' => 'Aset rusak tidak boleh berstatus tersedia.'])
@@ -149,7 +149,7 @@ class AsetController extends Controller
         if ($aset->status_aset === 'digunakan') {
             return redirect()
                 ->route('admin.aset.index')
-                ->withErrors(['error' => 'Aset yang sedang digunakan tidak dapat diperbarui.']);
+                ->with('error', 'Aset yang sedang digunakan tidak dapat diperbarui.'); // Ganti ke with('error')
         }
 
         $request->validate([
@@ -162,6 +162,7 @@ class AsetController extends Controller
 
         if ($request->kondisi_aset === 'rusak' && $request->status_aset === 'tersedia') {
             return back()
+                ->with('error', 'Aset rusak tidak boleh berstatus tersedia.') // Tambahkan with error untuk pop-up global
                 ->withErrors(['status_aset' => 'Aset rusak tidak boleh berstatus tersedia.'])
                 ->withInput();
         }
@@ -200,13 +201,15 @@ class AsetController extends Controller
     public function destroy(Aset $aset)
     {
         if ($aset->status_aset === 'digunakan') {
-            return back()
-                ->withErrors(['error' => 'Aset yang sedang digunakan tidak dapat dihapus.']);
+            return redirect()
+                ->route('admin.aset.index')
+                ->with('error', 'Aset yang sedang digunakan tidak dapat dihapus.'); 
         }
 
         $aset->delete();
 
-        return back()
-            ->with('success', 'Aset berhasil dihapus.');
+        return redirect()
+            ->route('admin.aset.index')
+            ->with('success', 'Aset berhasil dihapus selamanya.');
     }
 }

@@ -222,79 +222,95 @@
 
     {{-- SCRIPTS --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script>
-        document.querySelectorAll('.form-delete').forEach(form => {
-            form.addEventListener('submit', function (e) {
-                e.preventDefault();
-                Swal.fire({
-                    title: 'Hapus Aset?',
-                    text: "Data tidak bisa dikembalikan.",
-                    icon: 'warning',
-                    iconColor: '#fd2800',
-                    width: '320px',
-                    showCancelButton: true,
-                    confirmButtonText: 'Hapus',
-                    cancelButtonText: 'Batal',
-                    confirmButtonColor: '#fd2800',
-                    cancelButtonColor: '#171717',
-                    reverseButtons: true,
-                    buttonsStyling: false,
-                    customClass: {
-                        popup: 'rounded-xl font-sans',
-                        title: 'text-lg font-bold',
-                        htmlContainer: 'text-xs text-slate-500',
-                        confirmButton: 'rounded-lg px-4 py-2 text-xs font-bold shadow-md border-0',
-                        cancelButton: 'rounded-lg px-4 py-2 text-xs font-bold bg-white text-slate-700 border border-slate-200 hover:bg-slate-50',
-                        actions: 'gap-2'
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) form.submit();
-                });
-            });
-});
-
-
-        // 2. Logic Notifikasi Sukses (Compact Toast)
-@if(session('success'))
-Swal.fire({
-    icon: 'success',
-    title: 'Berhasil',
-    text: "{!! session('success') !!}", // Menggunakan !! agar karakter khusus tidak error
-    iconColor: '#fd2800',
-    background: '#ffffff',
-    color: '#171717',
-    width: 380,
-    showConfirmButton: false,
-    timer: 2200,
-    timerProgressBar: true,
-    customClass: {
-        popup: 'rounded-2xl shadow-xl border border-slate-100 font-sans',
-        title: 'text-lg font-bold text-[#171717]',
-        htmlContainer: 'text-sm text-slate-500'
-    }
-});
-@endif
-@if(session('error'))
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-Swal.fire({
-    icon: 'error',
-    title: 'Aksi Ditolak',
-    text: "{!! session('error') !!}",
-    iconColor: '#fd2800',
-    background: '#ffffff',
-    color: '#171717',
-    width: 380,
-    confirmButtonText: 'Mengerti',
-    confirmButtonColor: '#fd2800',
-    customClass: {
-        popup: 'rounded-2xl shadow-xl border border-slate-100 font-sans',
-        title: 'text-lg font-bold',
-        htmlContainer: 'text-sm text-slate-500',
-        confirmButton: 'rounded-lg px-4 py-2 text-xs font-bold border-0'
-    }
-});
-</script>
-@endif
+    /**
+     * Konfigurasi Dasar SweetAlert2 agar Setema dengan Asetu
+     */
+    const AsetuCustomStyle = {
+        popup: 'rounded-2xl shadow-2xl border border-slate-100 font-sans',
+        title: 'text-lg font-bold text-[#171717]',
+        confirmButton: 'rounded-xl px-6 py-2.5 text-sm font-bold transition-all mx-1',
+        cancelButton: 'rounded-xl px-6 py-2.5 text-sm font-bold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-all mx-1'
+    };
 
+    /**
+     * 1. Notifikasi Berhasil (Compact Toast di Tengah Atas)
+     * Muncul setelah Tambah, Edit, atau Hapus berhasil.
+     */
+    @if(session('success'))
+        Swal.fire({
+            icon: 'success',
+            title: "{{ session('success') }}",
+            toast: true,
+            position: 'top', // Di tengah atas layar
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            iconColor: '#fd2800',
+            background: '#ffffff',
+            customClass: {
+                popup: 'rounded-xl shadow-lg border border-slate-100 mt-4',
+                title: 'text-sm font-bold text-slate-700'
+            },
+            didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+            }
+        });
+    @endif
+
+    /**
+     * 2. Notifikasi Gagal (Elegant Pop-up)
+     */
+    @if(session('error') || $errors->any())
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops! Terjadi Kesalahan',
+            text: "{{ session('error') ?? 'Mohon periksa kembali inputan Anda.' }}",
+            iconColor: '#fd2800',
+            confirmButtonText: 'Tutup',
+            confirmButtonColor: '#171717', // Hitam elegan
+            buttonsStyling: false,
+            customClass: {
+                popup: AsetuCustomStyle.popup,
+                title: AsetuCustomStyle.title,
+                confirmButton: AsetuCustomStyle.confirmButton + ' bg-[#171717] text-white hover:bg-slate-800'
+            }
+        });
+    @endif
+
+    /**
+     * 3. Logic Konfirmasi Hapus (User Friendly)
+     */
+    document.querySelectorAll('.form-delete').forEach(form => {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Hapus Aset Ini?',
+                text: "Data yang sudah dihapus tidak dapat dipulihkan kembali.",
+                icon: 'warning',
+                iconColor: '#fd2800',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Hapus',
+                cancelButtonText: 'Batalkan',
+                confirmButtonColor: '#fd2800', // Merah Asetu
+                cancelButtonColor: '#f1f5f9',
+                reverseButtons: true,
+                buttonsStyling: false,
+                customClass: {
+                    popup: AsetuCustomStyle.popup,
+                    title: AsetuCustomStyle.title + ' text-xl',
+                    htmlContainer: 'text-sm text-slate-500',
+                    confirmButton: AsetuCustomStyle.confirmButton + ' bg-[#fd2800] text-white hover:bg-red-700 shadow-md shadow-red-200',
+                    cancelButton: AsetuCustomStyle.cancelButton
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
 </script>
 </x-app-layout>

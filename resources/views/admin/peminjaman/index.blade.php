@@ -189,24 +189,36 @@
                                     </div>
 
                                     {{-- FOOTER: Actions --}}
-                                    <div class="pt-5 mt-2 flex items-center gap-3 border-t border-[#f5f5f5]">
-                                        <form id="form-reject-{{ $item->id }}" action="{{ route('admin.peminjaman.reject', $item->id) }}" method="POST" class="flex-1">
-                                            @csrf @method('PATCH')
-                                            <button type="button" 
-                                                class="btn-reject w-full py-2.5 px-3 rounded-lg border border-[#ededed] bg-white text-xs font-bold text-[#444444] font-heading hover:bg-gray-50 hover:text-[#171717] hover:border-gray-300 transition-all focus:ring-2 focus:ring-gray-200"
-                                                data-id="{{ $item->id }}"
-                                                data-name="{{ $item->aset->nama_aset }}"
-                                                data-user="{{ $item->pegawai->nama_pegawai }}">
-                                                Tolak
-                                            </button>
-                                        </form>
-                                        <form action="{{ route('admin.peminjaman.approve', $item->id) }}" method="POST" class="flex-1">
-                                            @csrf @method('PATCH')
-                                            <button type="submit" class="w-full py-2.5 px-3 rounded-lg bg-[#fd2800] border border-[#fd2800] text-xs font-bold text-white font-heading hover:bg-[#d62200] hover:border-[#d62200] shadow-md shadow-red-500/20 hover:shadow-red-500/30 transform active:scale-95 transition-all focus:ring-2 focus:ring-red-200">
-                                                Setujui
-                                            </button>
-                                        </form>
-                                    </div>
+                                    <div class="pt-5 mt-4 flex items-center gap-3 border-t border-slate-100">
+    {{-- Form Tolak --}}
+    <form id="form-reject-{{ $item->id }}" action="{{ route('admin.peminjaman.reject', $item->id) }}" method="POST" class="flex-1">
+        @csrf @method('PATCH')
+        <button type="button" 
+            class="btn-reject-borrow w-full py-2.5 px-4 rounded-xl border border-slate-200 bg-white text-xs font-bold text-slate-600 hover:bg-red-50 hover:text-[#fd2800] hover:border-red-100 transition-all duration-200 flex items-center justify-center gap-2"
+            data-id="{{ $item->id }}"
+            data-name="{{ $item->aset->nama_aset }}"
+            data-user="{{ $item->pegawai->nama_pegawai }}">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            Tolak
+        </button>
+    </form>
+
+    {{-- Form Setujui --}}
+    <form id="form-approve-{{ $item->id }}" action="{{ route('admin.peminjaman.approve', $item->id) }}" method="POST" class="flex-1">
+        @csrf @method('PATCH')
+        <button type="button" 
+            class="btn-approve-borrow w-full py-2.5 px-4 rounded-xl bg-[#171717] text-xs font-bold text-white hover:bg-[#228B22] shadow-sm hover:shadow-green-500/20 transform active:scale-95 transition-all duration-200 flex items-center justify-center gap-2"
+            data-id="{{ $item->id }}"
+            data-name="{{ $item->aset->nama_aset }}">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            Setujui
+        </button>
+    </form>
+</div>
 
                                 </div>
                             @endforeach
@@ -298,7 +310,7 @@
                                                                 class="inline-flex w-fit items-center gap-1 px-2 py-0.5 rounded-md bg-red-50 text-red-600 text-[10px] font-bold font-heading"
                                                                 title="Aset ini dipinjam dalam durasi jangka panjang"
                                                             >
-                                                                ⏱ Digunakan jangka panjang
+                                                                Digunakan jangka panjang
                                                             </span>
                                                         @endif
                                                     </div>
@@ -401,191 +413,178 @@
 
     {{-- SCRIPTS --}}
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        
-        // --- 1. NOTIFIKASI SUKSES (Toast) ---
-        @if(session('success'))
-            const Toast = Swal.mixin({
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // 1. Toast Notification Setup
+            const AsetuToast = Swal.mixin({
                 toast: true,
-                position: 'top-end',
+                position: 'top',
                 showConfirmButton: false,
                 timer: 3000,
                 timerProgressBar: true,
-                background: '#171717',
-                color: '#ffffff',
-                didOpen: (toast) => {
-                    toast.addEventListener('mouseenter', Swal.stopTimer)
-                    toast.addEventListener('mouseleave', Swal.resumeTimer)
+                background: '#ffffff',
+                customClass: { popup: 'rounded-xl shadow-lg border border-slate-100 mt-4' }
+            });
+
+            @if(session('success'))
+                AsetuToast.fire({ icon: 'success', title: "{{ session('success') }}", iconColor: '#fd2800' });
+            @endif
+
+            @if(session('error'))
+                Swal.fire({ icon: 'error', title: 'Gagal', text: "{{ session('error') }}", confirmButtonColor: '#fd2800', customClass: { popup: 'rounded-2xl' } });
+            @endif
+
+            // 2. Event Delegation for Buttons
+            document.body.addEventListener('click', function(e) {
+                
+                // --- Persetujuan (Approve) ---
+                const btnApprove = e.target.closest('.btn-approve-borrow');
+                if (btnApprove) {
+                    const id = btnApprove.dataset.id;
+                    const name = btnApprove.dataset.name;
+                    Swal.fire({
+                        title: 'Setujui Peminjaman?',
+                        html: `Anda akan menyetujui peminjaman aset <br><b>${name}</b>`,
+                        icon: 'question',
+                        iconColor: '#228B22',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, Setujui',
+                        confirmButtonColor: '#228B22',
+                        cancelButtonColor: '#f1f5f9',
+                        reverseButtons: true,
+                        buttonsStyling: false,
+                        customClass: {
+                            popup: 'rounded-2xl shadow-xl border border-slate-100',
+                            confirmButton: 'rounded-xl px-6 py-2.5 text-sm font-bold bg-[#228B22] text-white mx-1 hover:bg-green-700',
+                            cancelButton: 'rounded-xl px-6 py-2.5 text-sm font-bold bg-slate-100 text-slate-600 mx-1'
+                        }
+                    }).then((r) => { if (r.isConfirmed) document.getElementById(`form-approve-${id}`).submit(); });
+                }
+
+                // --- Penolakan (Reject) ---
+                const btnReject = e.target.closest('.btn-reject-borrow');
+                if (btnReject) {
+                    const id = btnReject.dataset.id;
+                    const name = btnReject.dataset.name;
+                    const user = btnReject.dataset.user;
+                    Swal.fire({
+                        title: 'Tolak Peminjaman?',
+                        html: `Permohonan <b>${user}</b> untuk aset <br><b>${name}</b> akan ditolak.`,
+                        icon: 'warning',
+                        iconColor: '#fd2800',
+                        showCancelButton: true,
+                        confirmButtonText: 'Ya, Tolak',
+                        confirmButtonColor: '#fd2800',
+                        cancelButtonColor: '#f1f5f9',
+                        reverseButtons: true,
+                        buttonsStyling: false,
+                        customClass: {
+                            popup: 'rounded-2xl shadow-xl border border-slate-100',
+                            confirmButton: 'rounded-xl px-6 py-2.5 text-sm font-bold bg-[#fd2800] text-white mx-1 hover:bg-red-700',
+                            cancelButton: 'rounded-xl px-6 py-2.5 text-sm font-bold bg-slate-100 text-slate-600 mx-1'
+                        }
+                    }).then((r) => { if (r.isConfirmed) document.getElementById(`form-reject-${id}`).submit(); });
+                }
+                // --- Pengembalian (Return) ---
+                const btnReturn = e.target.closest('.btn-return');
+                if (btnReturn) {
+                    e.preventDefault();
+                    const id = btnReturn.dataset.id;
+                    const namaAset = btnReturn.dataset.name;
+
+                    Swal.fire({
+                        title: '<span class="font-heading text-2xl text-[#171717] font-bold">Verifikasi Pengembalian</span>',
+                        html: `
+                            <div class="text-left mt-2">
+                                <div class="bg-[#f8f9fa] p-4 rounded-xl border border-[#ededed] mb-6">
+                                    <p class="text-xs text-[#444444] uppercase tracking-wider font-bold mb-0.5 font-heading">Aset Dikembalikan</p>
+                                    <p class="text-[#171717] font-bold text-lg leading-tight font-heading">${namaAset}</p>
+                                </div>
+
+                                <p class="text-sm font-bold text-[#171717] mb-3 font-heading">Bagaimana kondisi aset saat ini?</p>
+
+                                <div class="grid grid-cols-1 gap-3" id="swal-radio-group">
+                                    <label class="relative flex items-center p-4 rounded-xl border border-[#ededed] cursor-pointer hover:border-[#fd2800] hover:bg-red-50/10 transition-all duration-200 group">
+                                        <input type="radio" name="kondisi_fisik" value="baik" class="peer sr-only" checked>
+                                        <div class="flex items-center justify-between w-full">
+                                            <div class="flex flex-col">
+                                                <p class="font-bold text-[#171717] text-sm font-heading">Baik / Normal</p>
+                                                <p class="text-xs text-[#444444] font-body mt-0.5">Aset berfungsi dengan semestinya</p>
+                                            </div>
+                                            <div class="w-4 h-4 border-2 border-[#ededed] rounded-full peer-checked:border-[#fd2800] peer-checked:bg-[#fd2800] transition-colors relative"></div>
+                                        </div>
+                                        <div class="absolute inset-0 rounded-xl border-2 border-transparent peer-checked:border-[#fd2800] pointer-events-none"></div>
+                                    </label>
+
+                                    <label class="relative flex items-center p-4 rounded-xl border border-[#ededed] cursor-pointer hover:border-[#fd2800] hover:bg-red-50/10 transition-all duration-200 group">
+                                        <input type="radio" name="kondisi_fisik" value="rusak" class="peer sr-only">
+                                        <div class="flex items-center justify-between w-full">
+                                            <div class="flex flex-col">
+                                                <p class="font-bold text-[#171717] text-sm font-heading">Rusak</p>
+                                                <p class="text-xs text-[#444444] font-body mt-0.5">Perlu perbaikan atau servis</p>
+                                            </div>
+                                            <div class="w-4 h-4 border-2 border-[#ededed] rounded-full peer-checked:border-[#fd2800] peer-checked:bg-[#fd2800] transition-colors relative"></div>
+                                        </div>
+                                        <div class="absolute inset-0 rounded-xl border-2 border-transparent peer-checked:border-[#fd2800] pointer-events-none"></div>
+                                    </label>
+
+                                    <label class="relative flex items-center p-4 rounded-xl border border-[#ededed] cursor-pointer hover:border-[#fd2800] hover:bg-red-50/10 transition-all duration-200 group">
+                                        <input type="radio" name="kondisi_fisik" value="hilang" class="peer sr-only">
+                                        <div class="flex items-center justify-between w-full">
+                                            <div class="flex flex-col">
+                                                <p class="font-bold text-[#171717] text-sm font-heading">Hilang</p>
+                                                <p class="text-xs text-[#444444] font-body mt-0.5">Aset tidak ditemukan / hilang</p>
+                                            </div>
+                                            <div class="w-4 h-4 border-2 border-[#ededed] rounded-full peer-checked:border-[#fd2800] peer-checked:bg-[#fd2800] transition-colors relative"></div>
+                                        </div>
+                                        <div class="absolute inset-0 rounded-xl border-2 border-transparent peer-checked:border-[#fd2800] pointer-events-none"></div>
+                                    </label>
+                                </div>
+                            </div>
+                        `,
+                        showCancelButton: true,
+                        confirmButtonText: 'Konfirmasi & Simpan',
+                        cancelButtonText: 'Batal',
+                        reverseButtons: true,
+                        confirmButtonColor: '#fd2800',
+                        cancelButtonColor: '#171717',
+                        focusConfirm: false,
+                        buttonsStyling: true,
+                        customClass: {
+                            popup: 'rounded-2xl font-body p-0 overflow-hidden',
+                            actions: 'bg-[#f8f9fa] w-full m-0 p-4 border-t border-[#ededed] flex justify-end gap-3',
+                            confirmButton: 'font-heading font-bold text-sm px-6 py-2.5 rounded-lg shadow-lg shadow-red-500/20 order-2',
+                            cancelButton: 'font-heading font-bold text-sm px-6 py-2.5 rounded-lg bg-white text-[#171717] border border-[#ededed] hover:bg-gray-50 order-1 hover:text-black',
+                            htmlContainer: '!m-0 !p-6',
+                            title: '!p-6 !pb-0 !m-0 flex items-start',
+                        },
+                        preConfirm: () => {
+                            const selectedOption = document.querySelector('input[name="kondisi_fisik"]:checked');
+                            if (!selectedOption) {
+                                Swal.showValidationMessage('Mohon pilih kondisi aset terlebih dahulu');
+                                return false;
+                            }
+                            return selectedOption.value;
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            const inputField = document.getElementById('input-kondisi-' + id);
+                            const form = document.getElementById('form-return-' + id);
+
+                            if (inputField && form) {
+                                inputField.value = result.value;
+                                form.submit();
+                            }
+                        }
+                    });
                 }
             });
-
-            Toast.fire({
-                icon: 'success',
-                title: "{{ session('success') }}",
-                iconColor: '#fd2800'
-            });
-
-            
-        @endif
-        document.body.addEventListener('click', function(e) {
-            const target = e.target.closest('.btn-reject');
-
-            if (target) {
-                e.preventDefault();
-                const id = target.getAttribute('data-id');
-                const namaAset = target.getAttribute('data-name');
-                const namaUser = target.getAttribute('data-user');
-
-                Swal.fire({
-                    title: '<span class="font-heading text-2xl text-[#171717] font-bold">Tolak Permintaan?</span>',
-                    html: `
-                        <div class="text-center mt-2">
-                            <p class="text-sm text-[#444444] font-body">
-                                Anda akan menolak permintaan peminjaman <strong>${namaAset}</strong> oleh <strong>${namaUser}</strong>.
-                            </p>
-                            <p class="text-xs text-red-500 mt-2 italic font-medium">* Tindakan ini tidak dapat dibatalkan.</p>
-                        </div>
-                    `,
-                    icon: 'warning',
-                    iconColor: '#fd2800',
-                    showCancelButton: true,
-                    confirmButtonText: 'Ya, Tolak Permintaan',
-                    cancelButtonText: 'Batalkan',
-                    reverseButtons: true,
-                    confirmButtonColor: '#fd2800',
-                    cancelButtonColor: '#171717',
-                    customClass: {
-                        popup: 'rounded-2xl font-body',
-                        confirmButton: 'font-heading font-bold text-sm px-6 py-2.5 rounded-lg',
-                        cancelButton: 'font-heading font-bold text-sm px-6 py-2.5 rounded-lg'
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Submit form secara programatik
-                        document.getElementById('form-reject-' + id).submit();
-                    }
-                });
-            }
         });
-        document.body.addEventListener('click', function(e) {
-            const target = e.target.closest('.btn-return');
 
-            if (target) {
-                e.preventDefault();
-                const id = target.getAttribute('data-id');
-                const namaAset = target.getAttribute('data-name');
-
-                Swal.fire({
-                    // Judul dengan font Poppins
-                    title: '<span class="font-heading text-2xl text-[#171717] font-bold">Verifikasi Pengembalian</span>',
-                    
-                    // HTML Custom TANPA Icon
-                    html: `
-                        <div class="text-left mt-2">
-                            <div class="bg-[#f8f9fa] p-4 rounded-xl border border-[#ededed] mb-6">
-                                <p class="text-xs text-[#444444] uppercase tracking-wider font-bold mb-0.5 font-heading">Aset Dikembalikan</p>
-                                <p class="text-[#171717] font-bold text-lg leading-tight font-heading">${namaAset}</p>
-                            </div>
-
-                            <p class="text-sm font-bold text-[#171717] mb-3 font-heading">Bagaimana kondisi aset saat ini?</p>
-
-                            <div class="grid grid-cols-1 gap-3" id="swal-radio-group">
-                                
-                                <label class="relative flex items-center p-4 rounded-xl border border-[#ededed] cursor-pointer hover:border-[#fd2800] hover:bg-red-50/10 transition-all duration-200 group">
-                                    <input type="radio" name="kondisi_fisik" value="baik" class="peer sr-only" checked>
-                                    <div class="flex items-center justify-between w-full">
-                                        <div class="flex flex-col">
-                                            <p class="font-bold text-[#171717] text-sm font-heading">Baik / Normal</p>
-                                            <p class="text-xs text-[#444444] font-body mt-0.5">Aset berfungsi dengan semestinya</p>
-                                        </div>
-                                        <div class="w-4 h-4 border-2 border-[#ededed] rounded-full peer-checked:border-[#fd2800] peer-checked:bg-[#fd2800] transition-colors relative"></div>
-                                    </div>
-                                    <div class="absolute inset-0 rounded-xl border-2 border-transparent peer-checked:border-[#fd2800] pointer-events-none"></div>
-                                </label>
-
-                                <label class="relative flex items-center p-4 rounded-xl border border-[#ededed] cursor-pointer hover:border-[#fd2800] hover:bg-red-50/10 transition-all duration-200 group">
-                                    <input type="radio" name="kondisi_fisik" value="rusak" class="peer sr-only">
-                                    <div class="flex items-center justify-between w-full">
-                                        <div class="flex flex-col">
-                                            <p class="font-bold text-[#171717] text-sm font-heading">Rusak</p>
-                                            <p class="text-xs text-[#444444] font-body mt-0.5">Perlu perbaikan atau servis</p>
-                                        </div>
-                                        <div class="w-4 h-4 border-2 border-[#ededed] rounded-full peer-checked:border-[#fd2800] peer-checked:bg-[#fd2800] transition-colors"></div>
-                                    </div>
-                                    <div class="absolute inset-0 rounded-xl border-2 border-transparent peer-checked:border-[#fd2800] pointer-events-none"></div>
-                                </label>
-
-                                <label class="relative flex items-center p-4 rounded-xl border border-[#ededed] cursor-pointer hover:border-[#fd2800] hover:bg-red-50/10 transition-all duration-200 group">
-                                    <input type="radio" name="kondisi_fisik" value="hilang" class="peer sr-only">
-                                    <div class="flex items-center justify-between w-full">
-                                        <div class="flex flex-col">
-                                            <p class="font-bold text-[#171717] text-sm font-heading">Hilang</p>
-                                            <p class="text-xs text-[#444444] font-body mt-0.5">Aset tidak ditemukan / hilang</p>
-                                        </div>
-                                        <div class="w-4 h-4 border-2 border-[#ededed] rounded-full peer-checked:border-[#fd2800] peer-checked:bg-[#fd2800] transition-colors"></div>
-                                    </div>
-                                    <div class="absolute inset-0 rounded-xl border-2 border-transparent peer-checked:border-[#fd2800] pointer-events-none"></div>
-                                </label>
-                            </div>
-                        </div>
-                    `,
-                    showCancelButton: true,
-                    confirmButtonText: 'Konfirmasi & Simpan',
-                    cancelButtonText: 'Batal',
-                    reverseButtons: true,
-                    confirmButtonColor: '#fd2800',
-                    cancelButtonColor: '#171717',
-                    focusConfirm: false,
-                    buttonsStyling: true,
-                    customClass: {
-                        popup: 'rounded-2xl font-body p-0 overflow-hidden',
-                        actions: 'bg-[#f8f9fa] w-full m-0 p-4 border-t border-[#ededed] flex justify-end gap-3',
-                        confirmButton: 'font-heading font-bold text-sm px-6 py-2.5 rounded-lg shadow-lg shadow-red-500/20 order-2',
-                        cancelButton: 'font-heading font-bold text-sm px-6 py-2.5 rounded-lg bg-white text-[#171717] border border-[#ededed] hover:bg-gray-50 order-1 hover:text-black',
-                        htmlContainer: '!m-0 !p-6',
-                        title: '!p-6 !pb-0 !m-0 flex items-start',
-                    },
-                    preConfirm: () => {
-                        const selectedOption = document.querySelector('input[name="kondisi_fisik"]:checked');
-                        if (!selectedOption) {
-                            Swal.showValidationMessage('Mohon pilih kondisi aset terlebih dahulu');
-                            return false;
-                        }
-                        return selectedOption.value;
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        const inputField = document.getElementById('input-kondisi-' + id);
-                        const form = document.getElementById('form-return-' + id);
-
-                        if (inputField && form) {
-                            inputField.value = result.value;
-                            form.submit();
-                        }
-                    }
-                });
-            }
-        });
-    });
-
-    function cetakPDF() {
-        const bulan = document.getElementById('bulan').value;
-        const tahun = document.getElementById('tahun').value;
-        window.open(`/admin/peminjaman/cetak-pdf?bulan=${bulan}&tahun=${tahun}`, '_blank');
-    }
-
-    
+        function cetakPDF() {
+            const b = document.getElementById('bulan').value;
+            const t = document.getElementById('tahun').value;
+            window.open(`/admin/peminjaman/cetak-pdf?bulan=${b}&tahun=${t}`, '_blank');
+        }
     </script>
-
-    
-@if(session('error'))
-        <script>
-            Swal.fire({
-                icon: 'error',
-                title: 'Gagal Menyetujui',
-                text: "{{ session('error') }}",
-                confirmButtonColor: '#4f46e5'
-            });
-        </script>
-    @endif
 </x-app-layout>
